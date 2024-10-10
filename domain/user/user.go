@@ -31,6 +31,12 @@ type User struct {
 	PasswordHash PasswordHash
 }
 
+func New(ID uuid.UUID, name Name, email Email, passwordHash PasswordHash) *User {
+	return &User{
+		ID, name, email, passwordHash,
+	}
+}
+
 func NewUser(name string, email string, password string) (*User, error) {
 	_id := uuid.New()
 	_name, err := NewName(name)

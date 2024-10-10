@@ -23,6 +23,7 @@ type UserService struct {
 func NewUserRoutes(e *echo.Echo, ur *UserService) {
 	e.Logger.Debugf("Hello")
 	e.POST("/user/register", ur.Register)
+	e.GET("/user", ur.GetAll)
 }
 
 func NewUserService(ur user.Repo) *UserService {
@@ -41,7 +42,22 @@ func (u UserService) Register(c echo.Context) error {
 			"errs": fmt.Sprintf("%s", err),
 		})
 	}
-	u.userRepo.Add(user)
+	_, err = u.userRepo.Add(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"errs": fmt.Sprintf("%s", err),
+		})
+	}
 	c.JSON(http.StatusOK, user)
+	return nil
+}
+
+func (u UserService) GetAll(c echo.Context) error {
+	users, err := u.userRepo.GetAll()
+	if err != nil {
+		return err
+	}
+	log.Println(users)
+	c.JSON(http.StatusOK, users)
 	return nil
 }
