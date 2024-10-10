@@ -1,13 +1,22 @@
 package postgres
 
 import (
+	"errors"
 	"financeapp/domain/user"
 
 	"github.com/jmoiron/sqlx"
 )
 
+var ErrorUserNotFound = errors.New("User not found")
+
 type UserRepo struct {
-	*sqlx.DB
+	db *sqlx.DB
+}
+
+func NewUserRepo(db *sqlx.DB) *UserRepo {
+	return &UserRepo{
+		db: db,
+	}
 }
 
 func (u UserRepo) Add(*user.User) (*user.User, error) {

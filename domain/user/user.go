@@ -31,12 +31,30 @@ type User struct {
 	PasswordHash PasswordHash
 }
 
-func NewUser(id uuid.UUID, name Name, email Email, passwordhash PasswordHash) *User {
-	return &User{
-		ID:   id,
-		Name: name, Email: email,
-		PasswordHash: passwordhash,
+func NewUser(name string, email string, password string) (*User, error) {
+	_id := uuid.New()
+	_name, err := NewName(name)
+	if err != nil {
+		return nil, err
 	}
+	_email, err := NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	_password, err := NewPassword(password)
+	if err != nil {
+		return nil, err
+	}
+	_passwordHash, err := NewPasswordHash(_password)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		ID:           _id,
+		Name:         _name,
+		Email:        _email,
+		PasswordHash: _passwordHash,
+	}, nil
 }
 
 func NewName(n string) (Name, error) {
@@ -59,12 +77,12 @@ func NewPassword(p string) (Password, error) {
 	return Password(p), nil
 }
 
-func NewPasswordHash(p Password) (string, error) {
+func NewPasswordHash(p Password) (PasswordHash, error) {
 	pb, err := bcrypt.GenerateFromPassword([]byte(p), 10)
 	if err != nil {
 		return "", err
 	}
-	return string(pb), err
+	return PasswordHash(string(pb)), err
 }
 
 func ComparePassword(p Password, ph PasswordHash) error {
