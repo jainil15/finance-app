@@ -51,6 +51,7 @@ func NewBudgetRoutes(e *echo.Echo, bs *BudgetService) {
 		middleware.CheckUser,
 	)
 	e.POST("user/:user_id/budget", bs.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	e.PUT("user/:user_id/budget", bs.Update, middleware.AuthMiddleware, middleware.CheckUser)
 }
 
 func (bs BudgetService) GetByUserID(c echo.Context) error {
@@ -107,6 +108,51 @@ func (bs BudgetService) Add(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, utils.Error{
 			Message: "Error adding budget",
+		})
+	}
+	return c.JSON(http.StatusCreated, utils.Response{
+		Message: "Budget Created",
+		Result:  ToBudgetResponse(b),
+	})
+}
+
+func (bs BudgetService) Update(c echo.Context) error {
+	bRequest := addBudgetRequest{}
+	err := c.Bind(&bRequest)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: "Bad request",
+		})
+	}
+	b, errs := budget.NewBudget(
+		bRequest.UserID,
+		bRequest.Currency,
+		bRequest.Value,
+	)
+	if errs != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: "Bad request",
+			Error:   errs,
+		})
+	}
+	b, err = bs.budgetRepo.Update(b.UserID, b)
+	if err != nil {
+		if errors.Is(err, budget.ErrorBudgetNotFound) {
+			return c.JSON(http.StatusNotFound, utils.Error{
+				Message: "Budget not found for user",
+			})
+		}
+		pgxError, ok := err.(*pgconn.PgError)
+		if ok {
+			switch pgxError.Code {
+			case "23505":
+				return c.JSON(http.StatusConflict, utils.Error{
+					Message: "Budget already exists",
+				})
+			}
+		}
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Message: "Error updating budget",
 		})
 	}
 	return c.JSON(http.StatusCreated, utils.Response{
