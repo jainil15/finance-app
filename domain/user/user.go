@@ -15,6 +15,7 @@ var (
 	ErrorEmptyName        = errors.New("Name required")
 	ErrorPasswordMismatch = errors.New("Incorrect Password")
 	ErrorEmptyEmail       = errors.New("Email Required")
+	ErrorEmptyPassword    = errors.New("Passwrod Required")
 	ErrorInvalidPassword  = errors.New("Password Not Valid")
 	ErrorInvalidUUID      = errors.New("Invalid UUID")
 	ErrorPasswordTooShort = errors.New("Password too short")

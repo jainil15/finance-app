@@ -4,6 +4,7 @@ import (
 	"errors"
 	"financeapp/domain/account"
 	"financeapp/domain/user"
+	errx "financeapp/pkg/errors"
 	"financeapp/pkg/utils"
 	"fmt"
 	"log"
@@ -56,6 +57,18 @@ func ToUserResponse(u *user.User) *userResponse {
 	}
 }
 
+type loginResponse struct {
+	UserResponse userResponse `json:"user"`
+	AccessToken  string       `json:"access_token"`
+}
+
+func NewLoginResponse(us *userResponse, token string) *loginResponse {
+	return &loginResponse{
+		UserResponse: *us,
+		AccessToken:  token,
+	}
+}
+
 func ToAccountResponse(a *account.Account) *accountResponse {
 	return &accountResponse{
 		ID:     a.ID,
@@ -78,7 +91,18 @@ func NewUserService(ur user.Repo, ar account.Repo) *UserService {
 	}
 }
 
-func (lr *LoginRequest) ValidateUserLogin() {
+func (lr *LoginRequest) ValidateUserLogin() errx.Error {
+	errs := errx.New()
+	if _, err := user.NewEmail(string(lr.Email)); err != nil {
+		errs.Add("email", err.Error())
+	}
+	if len(lr.Password) == 0 {
+		errs.Add("password", user.ErrorEmptyPassword.Error())
+	}
+	if len(errs) == 0 {
+		return nil
+	}
+	return errs
 }
 
 func (u UserService) Register(c echo.Context) error {
@@ -161,6 +185,13 @@ func (u UserService) Login(c echo.Context) error {
 			Error:   err,
 		})
 	}
+	errs := loginUser.ValidateUserLogin()
+	if errs != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: fmt.Sprintf("Bad Request"),
+			Error:   errs,
+		})
+	}
 	us, err := u.userRepo.GetByEmail(loginUser.Email)
 	if err != nil {
 		if errors.Is(err, user.ErrorUserNotFound) {
@@ -175,7 +206,7 @@ func (u UserService) Login(c echo.Context) error {
 	err = bcrypt.CompareHashAndPassword([]byte(us.PasswordHash), []byte(loginUser.Password))
 	if err != nil {
 		if errors.Is(bcrypt.ErrMismatchedHashAndPassword, err) {
-			return c.JSON(http.StatusInternalServerError, utils.Error{
+			return c.JSON(http.StatusUnauthorized, utils.Error{
 				Message: "Invalid Email or Password",
 			})
 		}
@@ -183,8 +214,19 @@ func (u UserService) Login(c echo.Context) error {
 			Message: err.Error(),
 		})
 	}
+	token, err := utils.CreateToken(us)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Message: "Error generatiing token",
+		})
+	}
+	loginRes := NewLoginResponse(
+		ToUserResponse(us),
+		token)
 	return c.JSON(
 		http.StatusOK,
-		ToUserResponse(us),
+		utils.Response{
+			Result: loginRes,
+		},
 	)
 }

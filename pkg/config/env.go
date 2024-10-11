@@ -16,6 +16,7 @@ type EnvConfig struct {
 	DBPassword string `env:"DB_PASSWORD"`
 	DBHost     string `env:"DB_HOST"`
 	DBPort     string `env:"DB_PORT"`
+	JWTSecret  string `env:"JWT_SECRET"`
 }
 
 func MustGetEnv(key string) string {
