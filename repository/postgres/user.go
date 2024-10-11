@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"financeapp/domain/user"
 	"log"
 
@@ -68,4 +70,38 @@ func (u UserRepo) GetAll() ([]user.User, error) {
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func (u UserRepo) GetById(userID uuid.UUID) (*user.User, error) {
+	_user := postgresUser{}
+	err := u.db.Get(
+		&_user,
+		"SELECT * FROM users WHERE id = $1",
+		userID,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, user.ErrorUserNotFound
+		}
+		return nil, err
+	}
+	us := user.New(_user.ID, _user.Name, _user.Email, _user.PasswordHash)
+	return us, nil
+}
+
+func (u UserRepo) GetByEmail(email user.Email) (*user.User, error) {
+	_user := postgresUser{}
+	err := u.db.Get(
+		&_user,
+		"SELECT * FROM users WHERE email = $1",
+		email,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, user.ErrorUserNotFound
+		}
+		return nil, err
+	}
+	us := user.New(_user.ID, _user.Name, _user.Email, _user.PasswordHash)
+	return us, nil
 }

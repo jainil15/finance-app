@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"financeapp/domain/account"
 	"financeapp/domain/user"
 	"financeapp/pkg/utils"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRegister struct {
@@ -34,6 +36,10 @@ type registerResponse struct {
 type UserService struct {
 	userRepo    user.Repo
 	accountRepo account.Repo
+}
+type LoginRequest struct {
+	Email    user.Email    `json:"email"`
+	Password user.Password `json:"password"`
 }
 
 func NewRegisterResponse(ur *userResponse, ar *accountResponse) *registerResponse {
@@ -61,6 +67,8 @@ func ToAccountResponse(a *account.Account) *accountResponse {
 func NewUserRoutes(e *echo.Echo, ur *UserService) {
 	e.POST("/user/register", ur.Register)
 	e.GET("/user", ur.GetAll)
+	e.GET("/user/:user_id", ur.GetById)
+	e.POST("/user/login", ur.Login)
 }
 
 func NewUserService(ur user.Repo, ar account.Repo) *UserService {
@@ -68,6 +76,9 @@ func NewUserService(ur user.Repo, ar account.Repo) *UserService {
 		userRepo:    ur,
 		accountRepo: ar,
 	}
+}
+
+func (lr *LoginRequest) ValidateUserLogin() {
 }
 
 func (u UserService) Register(c echo.Context) error {
@@ -115,4 +126,65 @@ func (u UserService) GetAll(c echo.Context) error {
 	log.Println(users)
 	c.JSON(http.StatusOK, uResponse)
 	return nil
+}
+
+func (u UserService) GetById(c echo.Context) error {
+	userID, err := uuid.Parse(c.Param("user_id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: fmt.Sprintf("Invalid user id: %s", userID),
+		})
+	}
+	us, err := u.userRepo.GetById(userID)
+	if err != nil {
+		if errors.Is(err, user.ErrorUserNotFound) {
+			return c.JSON(http.StatusNotFound, utils.Error{
+				Message: fmt.Sprintf("User with user id: %s not found", userID),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(
+		http.StatusOK,
+		ToUserResponse(us),
+	)
+}
+
+func (u UserService) Login(c echo.Context) error {
+	loginUser := LoginRequest{}
+	err := c.Bind(&loginUser)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: fmt.Sprintf("Invalid request payload"),
+			Error:   err,
+		})
+	}
+	us, err := u.userRepo.GetByEmail(loginUser.Email)
+	if err != nil {
+		if errors.Is(err, user.ErrorUserNotFound) {
+			return c.JSON(http.StatusNotFound, utils.Error{
+				Message: fmt.Sprintf("User with user email: %s not found", loginUser.Email),
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Message: err.Error(),
+		})
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(us.PasswordHash), []byte(loginUser.Password))
+	if err != nil {
+		if errors.Is(bcrypt.ErrMismatchedHashAndPassword, err) {
+			return c.JSON(http.StatusInternalServerError, utils.Error{
+				Message: "Invalid Email or Password",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(
+		http.StatusOK,
+		ToUserResponse(us),
+	)
 }

@@ -12,7 +12,9 @@ const (
 )
 
 var (
+	ErrorEmptyName        = errors.New("Name required")
 	ErrorPasswordMismatch = errors.New("Incorrect Password")
+	ErrorEmptyEmail       = errors.New("Email Required")
 	ErrorInvalidPassword  = errors.New("Password Not Valid")
 	ErrorInvalidUUID      = errors.New("Invalid UUID")
 	ErrorPasswordTooShort = errors.New("Password too short")
@@ -65,10 +67,16 @@ func NewUser(name string, email string, password string) (*User, error) {
 }
 
 func NewName(n string) (Name, error) {
+	if len(n) < 1 {
+		return "", ErrorEmptyEmail
+	}
 	return Name(n), nil
 }
 
 func NewEmail(e string) (Email, error) {
+	if len(e) < 1 {
+		return "", ErrorEmptyEmail
+	}
 	return Email(e), nil
 }
 

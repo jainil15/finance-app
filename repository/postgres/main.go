@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
 func New(user, password, host, port, dbname string) *sqlx.DB {
@@ -17,9 +18,13 @@ func New(user, password, host, port, dbname string) *sqlx.DB {
 		port,
 		dbname,
 	)
+	pgxConfig, err := pgx.ParseConfig(connectionString)
+	if err != nil {
+		log.Fatalf("Error while parsing database url")
+	}
 	db, err := sqlx.Connect(
-		"postgres",
-		connectionString,
+		"pgx",
+		pgxConfig.ConnString(),
 	)
 	if err != nil {
 		log.Fatalln(err)
