@@ -11,12 +11,12 @@ import (
 
 func CreateToken(u *user.User) (string, error) {
 	claim := jwt.MapClaims{
-		"iss":  "learngo",
-		"aud":  []string{"user"},
-		"sub":  fmt.Sprintf("%s", u.Name),
-		"exp":  time.Now().Add(time.Hour).Unix(),
-		"iat":  time.Now().Unix(),
-		"user": u,
+		"iss":     "financeapp",
+		"aud":     []string{"user"},
+		"sub":     fmt.Sprintf("%s", u.Name),
+		"exp":     time.Now().Add(time.Hour).Unix(),
+		"iat":     time.Now().Unix(),
+		"user_id": u.ID,
 	}
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenString, err := claims.SignedString([]byte(config.Env.JWTSecret))

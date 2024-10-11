@@ -5,6 +5,7 @@ import (
 	"financeapp/domain/account"
 	"financeapp/domain/user"
 	errx "financeapp/pkg/errors"
+	"financeapp/pkg/middleware"
 	"financeapp/pkg/utils"
 	"fmt"
 	"log"
@@ -79,8 +80,8 @@ func ToAccountResponse(a *account.Account) *accountResponse {
 // NOTE: maybe move to routes package
 func NewUserRoutes(e *echo.Echo, ur *UserService) {
 	e.POST("/user/register", ur.Register)
-	e.GET("/user", ur.GetAll)
-	e.GET("/user/:user_id", ur.GetById)
+	e.GET("/user", middleware.AuthMiddleware(ur.GetAll))
+	e.GET("/user/:user_id", middleware.AuthMiddleware(middleware.CheckUser(ur.GetById)))
 	e.POST("/user/login", ur.Login)
 }
 
@@ -153,10 +154,11 @@ func (u UserService) GetAll(c echo.Context) error {
 }
 
 func (u UserService) GetById(c echo.Context) error {
+	log.Println(c.Get("user_id"))
 	userID, err := uuid.Parse(c.Param("user_id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, utils.Error{
-			Message: fmt.Sprintf("Invalid user id: %s", userID),
+			Message: fmt.Sprintf("Invalid user id: %s", c.Param("user_id")),
 		})
 	}
 	us, err := u.userRepo.GetById(userID)
