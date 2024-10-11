@@ -51,7 +51,7 @@ func (u UserRepo) Add(us *user.User) (*user.User, error) {
 		return nil, err
 	}
 	tx.Commit()
-	return nil, nil
+	return us, nil
 }
 
 func (u UserRepo) GetAll() ([]user.User, error) {

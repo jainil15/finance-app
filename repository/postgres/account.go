@@ -18,6 +18,7 @@ func NewAccountRepo(db *sqlx.DB) *AccountRepo {
 
 func (a *AccountRepo) Add(newAccount *account.Account) (*account.Account, error) {
 	tx, err := a.db.Beginx()
+	defer tx.Rollback()
 	if err != nil {
 		return nil, err
 	}
@@ -29,5 +30,6 @@ func (a *AccountRepo) Add(newAccount *account.Account) (*account.Account, error)
 	if err != nil {
 		return nil, err
 	}
+	tx.Commit()
 	return newAccount, nil
 }
