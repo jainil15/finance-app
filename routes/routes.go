@@ -12,7 +12,7 @@ import (
 func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	e.Use(middleware.Logger())
 
-	userService := service.NewUserService(postgres.NewUserRepo(db))
+	userService := service.NewUserService(postgres.NewUserRepo(db), postgres.NewAccountRepo(db))
 	service.NewUserRoutes(e, userService)
 	return nil
 }

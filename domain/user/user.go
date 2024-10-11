@@ -15,6 +15,7 @@ var (
 	ErrorPasswordMismatch = errors.New("Incorrect Password")
 	ErrorInvalidPassword  = errors.New("Password Not Valid")
 	ErrorInvalidUUID      = errors.New("Invalid UUID")
+	ErrorPasswordTooShort = errors.New("Password too short")
 )
 
 type (
@@ -72,13 +73,8 @@ func NewEmail(e string) (Email, error) {
 }
 
 func NewPassword(p string) (Password, error) {
-	if len(p) < 10 {
-		return Password(
-				"",
-			), errors.Join(
-				ErrorInvalidPassword,
-				errors.New("Password Length must be greater than 10"),
-			)
+	if len(p) < minPasswordLength {
+		return Password(""), ErrorPasswordTooShort
 	}
 	return Password(p), nil
 }
