@@ -24,7 +24,10 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	cs := categoryService.NewCategoryService(postgres.NewCategoryRepo(db))
 	categoryService.NewCategoryRoutes(e, cs)
 
-	ts := transactionService.NewTransactionService(postgres.NewTransactionRepo(db))
+	ts := transactionService.NewTransactionService(
+		postgres.NewTransactionRepo(db),
+		postgres.NewCategoryRepo(db),
+	)
 	transactionService.NewTransactionRoutes(e, ts)
 	return nil
 }

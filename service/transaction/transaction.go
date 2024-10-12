@@ -1,6 +1,7 @@
 package transactionService
 
 import (
+	"financeapp/domain/category"
 	"financeapp/domain/transaction"
 	errx "financeapp/pkg/errors"
 	"financeapp/pkg/middleware"
@@ -16,11 +17,13 @@ import (
 
 type TransactionService struct {
 	transactionRepo repository.TransactionRepo
+	categoryRepo    category.Repo
 }
 
-func NewTransactionService(tr repository.TransactionRepo) *TransactionService {
+func NewTransactionService(tr repository.TransactionRepo, cr category.Repo) *TransactionService {
 	return &TransactionService{
 		transactionRepo: tr,
+		categoryRepo:    cr,
 	}
 }
 
@@ -105,6 +108,18 @@ func (ts TransactionService) Add(c echo.Context) error {
 			Error:   errs,
 		})
 	}
+	cat, err := ts.categoryRepo.GetByID(t.UserID, t.CategoryID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: "Category not found",
+		})
+	}
+	if cat == nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: "Category not found",
+		})
+	}
+	fmt.Println("Error:", cat)
 	tran := transaction.New(newID, t.UserID, t.CategoryID, curr, val, tt)
 	tran, err = ts.transactionRepo.Add(tran)
 	log.Println(tran)

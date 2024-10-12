@@ -14,5 +14,5 @@ var (
 type Repo interface {
 	Add(c *Category) (*Category, error)
 	GetByUserID(userID uuid.UUID) ([]Category, error)
-	GetByID(categoryID uuid.UUID) (*Category, error)
+	GetByID(userID, categoryID uuid.UUID) (*Category, error)
 }

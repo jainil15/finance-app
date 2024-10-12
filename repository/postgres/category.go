@@ -64,10 +64,14 @@ func (cr CategoryRepo) GetByUserID(userID uuid.UUID) ([]category.Category, error
 	return categories, nil
 }
 
-func (cr CategoryRepo) GetByID(categoryID uuid.UUID) (*category.Category, error) {
-	row := cr.db.QueryRowx("SELECT * FROM categories WHERE id=$1", categoryID)
+func (cr CategoryRepo) GetByID(userID, categoryID uuid.UUID) (*category.Category, error) {
+	row := cr.db.QueryRowx(
+		"SELECT * FROM categories WHERE id=$1 and user_id=$2",
+		categoryID,
+		userID,
+	)
 	c := category.Category{}
-	err := row.Scan(&c)
+	err := row.Scan(&c.ID, &c.UserID, &c.Name)
 	if err != nil {
 		return nil, err
 	}
