@@ -21,9 +21,9 @@ CREATE TABLE budgets (
   PRIMARY KEY(user_id)
 );
 -- +goose Down
-DROP TABLE users CASCADE;
-DROP TABLE accounts CASCADE;
-DROP TABLE budgets;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS accounts CASCADE;
+DROP TABLE IF EXISTS budgets CASCADE;
 -- +goose StatementBegin
 SELECT 'down SQL query';
 -- +goose StatementEnd

@@ -3,6 +3,7 @@ package routes
 import (
 	"financeapp/repository/postgres"
 	budgetService "financeapp/service/budget"
+	categoryService "financeapp/service/category"
 	userService "financeapp/service/user"
 
 	"github.com/jmoiron/sqlx"
@@ -15,7 +16,11 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 
 	us := userService.NewUserService(postgres.NewUserRepo(db), postgres.NewAccountRepo(db))
 	userService.NewUserRoutes(e, us)
+
 	bs := budgetService.NewBudgetService(postgres.NewBudgetRepo(db))
 	budgetService.NewBudgetRoutes(e, bs)
+
+	cs := categoryService.NewCategoryService(postgres.NewCategoryRepo(db))
+	categoryService.NewCategoryRoutes(e, cs)
 	return nil
 }
