@@ -9,5 +9,5 @@ import (
 
 type TransactionRepo interface {
 	Add(*transaction.Transaction) (*transaction.Transaction, error)
-	GetByUserId(userID *uuid.UUID) (*[]aggregate.Transaction, error)
+	GetByUserId(userID uuid.UUID) (*[]aggregate.Transaction, error)
 }

@@ -3,9 +3,11 @@ package transactionService
 import (
 	"financeapp/domain/transaction"
 	errx "financeapp/pkg/errors"
+	"financeapp/pkg/middleware"
 	"financeapp/pkg/utils"
 	"financeapp/repository/repository"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -23,7 +25,13 @@ func NewTransactionService(tr repository.TransactionRepo) *TransactionService {
 }
 
 func NewTransactionRoutes(e *echo.Echo, ts *TransactionService) {
-	e.POST("/user/:user_id/transaction", ts.Add)
+	e.POST("/user/:user_id/transaction", ts.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	e.GET(
+		"/user/:user_id/transactions",
+		ts.GetByUser,
+		middleware.AuthMiddleware,
+		middleware.CheckUser,
+	)
 }
 
 type transactionRequest struct {
@@ -51,6 +59,23 @@ func ToTransactinResponse(t *transaction.Transaction) *transactionResponse {
 		Currency:        t.Currency,
 		Value:           t.Value,
 	}
+}
+
+func (ts TransactionService) GetByUser(c echo.Context) error {
+	uID := c.Param("user_id")
+	userID, err := uuid.Parse(uID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, utils.Error{
+			Message: "Invalid user id",
+		})
+	}
+	trans, err := ts.transactionRepo.GetByUserId(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, utils.Error{
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, trans)
 }
 
 func (ts TransactionService) Add(c echo.Context) error {
@@ -82,6 +107,7 @@ func (ts TransactionService) Add(c echo.Context) error {
 	}
 	tran := transaction.New(newID, t.UserID, t.CategoryID, curr, val, tt)
 	tran, err = ts.transactionRepo.Add(tran)
+	log.Println(tran)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.Error{
 			Message: "Internal server error",
