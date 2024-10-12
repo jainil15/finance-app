@@ -4,6 +4,7 @@ import (
 	"financeapp/repository/postgres"
 	budgetService "financeapp/service/budget"
 	categoryService "financeapp/service/category"
+	transactionService "financeapp/service/transaction"
 	userService "financeapp/service/user"
 
 	"github.com/jmoiron/sqlx"
@@ -22,5 +23,8 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 
 	cs := categoryService.NewCategoryService(postgres.NewCategoryRepo(db))
 	categoryService.NewCategoryRoutes(e, cs)
+
+	ts := transactionService.NewTransactionService(postgres.NewTransactionRepo(db))
+	transactionService.NewTransactionRoutes(e, ts)
 	return nil
 }
