@@ -183,16 +183,17 @@ func (u UserService) Login(c echo.Context) error {
 	loginUser := LoginRequest{}
 	err := c.Bind(&loginUser)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, utils.Error{
-			Message: fmt.Sprintf("Invalid request payload"),
-			Error:   err,
-		})
+		errs := errx.New()
+		errs.Add("server", err.Error())
+		return utils.WriteHTML(
+			c,
+			forms.Login(loginUser.Email, loginUser.Password, &errs),
+		)
 	}
 	errs := loginUser.ValidateUserLogin()
 	if errs != nil {
 		return utils.WriteHTML(
 			c,
-			http.StatusBadRequest,
 			forms.Login(loginUser.Email, loginUser.Password, &errs),
 		)
 	}
@@ -203,7 +204,6 @@ func (u UserService) Login(c echo.Context) error {
 			errs.Add("email", fmt.Sprintf("User with user email: %s not found", loginUser.Email))
 			return utils.WriteHTML(
 				c,
-				http.StatusBadRequest,
 				forms.Login(loginUser.Email, loginUser.Password, &errs),
 			)
 		}
@@ -219,19 +219,24 @@ func (u UserService) Login(c echo.Context) error {
 			errs.Add("password", "Invalid Password")
 			return utils.WriteHTML(
 				c,
-				http.StatusBadRequest,
 				forms.Login(loginUser.Email, loginUser.Password, &errs),
 			)
 		}
-		return c.JSON(http.StatusInternalServerError, utils.Error{
-			Message: err.Error(),
-		})
+		errs = errx.New()
+		errs.Add("server", "Internal server error")
+		return utils.WriteHTML(
+			c,
+			forms.Login(loginUser.Email, loginUser.Password, &errs),
+		)
 	}
 	token, err := utils.CreateToken(us)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, utils.Error{
-			Message: "Error generatiing token",
-		})
+		errs = errx.New()
+		errs.Add("server", "Internal server error")
+		return utils.WriteHTML(
+			c,
+			forms.Login(loginUser.Email, loginUser.Password, &errs),
+		)
 	}
 	loginRes := NewLoginResponse(
 		ToUserResponse(us),
