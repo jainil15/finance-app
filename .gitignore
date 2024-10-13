@@ -3,4 +3,4 @@ bin
 tmp
 output.css
 node_modules
-
+*_templ.go
