@@ -23,14 +23,14 @@ func NewCategoryService(cr category.Repo) *CategoryService {
 	}
 }
 
-func NewCategoryRoutes(e *echo.Echo, cs *CategoryService) {
-	e.GET(
+func NewCategoryRoutes(g *echo.Group, cs *CategoryService) {
+	g.GET(
 		"user/:user_id/categories",
 		cs.GetByUser,
 		middleware.AuthMiddleware,
 		middleware.CheckUser,
 	)
-	e.POST("user/:user_id/categories", cs.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	g.POST("user/:user_id/categories", cs.Add, middleware.AuthMiddleware, middleware.CheckUser)
 }
 
 type catergoryRequest struct {

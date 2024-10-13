@@ -79,11 +79,11 @@ func ToAccountResponse(a *account.Account) *accountResponse {
 }
 
 // NOTE: maybe move to routes package
-func NewUserRoutes(e *echo.Echo, ur *UserService) {
-	e.POST("/user/register", ur.Register)
-	e.GET("/user", middleware.AuthMiddleware(ur.GetAll))
-	e.GET("/user/:user_id", middleware.AuthMiddleware(middleware.CheckUser(ur.GetById)))
-	e.POST("/user/login", ur.Login)
+func NewUserRoutes(g *echo.Group, ur *UserService) {
+	g.POST("/user/register", ur.Register)
+	g.GET("/user", middleware.AuthMiddleware(ur.GetAll))
+	g.GET("/user/:user_id", middleware.AuthMiddleware(middleware.CheckUser(ur.GetById)))
+	g.POST("/user/login", ur.Login)
 }
 
 func NewUserService(ur user.Repo, ar account.Repo) *UserService {

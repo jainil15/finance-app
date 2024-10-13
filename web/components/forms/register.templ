@@ -1,0 +1,16 @@
+package forms
+
+import "financeapp/pkg/errors"
+import "financeapp/pkg/model"
+
+templ Register(u model.RegisterUser, errs errx.Error) {
+	<form id="user-form" method="post" hx-post="/api/user/register" hx-replace-url="/register" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
+		@input("Name", "name", "text", u.Name, &errs)
+		@input("Email", "email", "email", u.Email, &errs)
+		@input("Password", "password", "password", u.Password, &errs)
+		<div>
+			<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
+			<button type="button" hx-get="/fragment/login" hx-swap="outerHTML" hx-replace-url="/login" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+		</div>
+	</form>
+}

@@ -15,9 +15,12 @@ templ input(label, name, inputType, value string, errs *errx.Error) {
 }
 
 templ Login(email, password string, errs *errx.Error) {
-	<form method="post" hx-post="/user/login" hx-target-error="outerHTML" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
+	<form id="user-form" method="post" hx-post="/api/user/login" hx-replace-url="/login" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
 		@input("Email", "email", "email", string(email), errs)
 		@input("Password", "password", "password", string(password), errs)
-		<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+		<div>
+			<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+			<button type="button" hx-get="/fragment/register" hx-swap="outerHTML" hx-replace-url="/register" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
+		</div>
 	</form>
 }

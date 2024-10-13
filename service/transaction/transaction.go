@@ -27,9 +27,9 @@ func NewTransactionService(tr repository.TransactionRepo, cr category.Repo) *Tra
 	}
 }
 
-func NewTransactionRoutes(e *echo.Echo, ts *TransactionService) {
-	e.POST("/user/:user_id/transaction", ts.Add, middleware.AuthMiddleware, middleware.CheckUser)
-	e.GET(
+func NewTransactionRoutes(g *echo.Group, ts *TransactionService) {
+	g.POST("/user/:user_id/transaction", ts.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	g.GET(
 		"/user/:user_id/transactions",
 		ts.GetByUser,
 		middleware.AuthMiddleware,
@@ -39,10 +39,10 @@ func NewTransactionRoutes(e *echo.Echo, ts *TransactionService) {
 
 type transactionRequest struct {
 	UserID          uuid.UUID `param:"user_id"`
-	CategoryID      uuid.UUID `                json:"category_id"`
-	TransactionType string    `                json:"transaction_type"`
-	Currency        string    `                json:"currency"`
-	Value           float64   `                json:"value"`
+	CategoryID      uuid.UUID `json:"category_id"`
+	TransactionType string    `json:"transaction_type"`
+	Currency        string    `json:"currency"`
+	Value           float64   `json:"value"`
 }
 type transactionResponse struct {
 	ID              uuid.UUID                   `json:"id"`
