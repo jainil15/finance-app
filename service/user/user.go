@@ -7,6 +7,7 @@ import (
 	errx "financeapp/pkg/errors"
 	"financeapp/pkg/middleware"
 	"financeapp/pkg/utils"
+	"financeapp/web/components/forms"
 	"fmt"
 	"log"
 	"net/http"
@@ -40,8 +41,8 @@ type UserService struct {
 	accountRepo account.Repo
 }
 type LoginRequest struct {
-	Email    user.Email    `json:"email"`
-	Password user.Password `json:"password"`
+	Email    string `json:"email"    form:"email"    validate:"email"`
+	Password string `json:"password" form:"password" validate:"email"`
 }
 
 func NewRegisterResponse(ur *userResponse, ar *accountResponse) *registerResponse {
@@ -189,18 +190,24 @@ func (u UserService) Login(c echo.Context) error {
 	}
 	errs := loginUser.ValidateUserLogin()
 	if errs != nil {
-		return c.JSON(http.StatusBadRequest, utils.Error{
-			Message: fmt.Sprintf("Bad Request"),
-			Error:   errs,
-		})
+		return utils.WriteHTML(
+			c,
+			http.StatusBadRequest,
+			forms.Login(loginUser.Email, loginUser.Password, &errs),
+		)
 	}
-	us, err := u.userRepo.GetByEmail(loginUser.Email)
+	us, err := u.userRepo.GetByEmail(user.Email(loginUser.Email))
 	if err != nil {
 		if errors.Is(err, user.ErrorUserNotFound) {
-			return c.JSON(http.StatusNotFound, utils.Error{
-				Message: fmt.Sprintf("User with user email: %s not found", loginUser.Email),
-			})
+			errs = errx.New()
+			errs.Add("email", fmt.Sprintf("User with user email: %s not found", loginUser.Email))
+			return utils.WriteHTML(
+				c,
+				http.StatusBadRequest,
+				forms.Login(loginUser.Email, loginUser.Password, &errs),
+			)
 		}
+
 		return c.JSON(http.StatusInternalServerError, utils.Error{
 			Message: err.Error(),
 		})
@@ -208,9 +215,13 @@ func (u UserService) Login(c echo.Context) error {
 	err = bcrypt.CompareHashAndPassword([]byte(us.PasswordHash), []byte(loginUser.Password))
 	if err != nil {
 		if errors.Is(bcrypt.ErrMismatchedHashAndPassword, err) {
-			return c.JSON(http.StatusUnauthorized, utils.Error{
-				Message: "Invalid Email or Password",
-			})
+			errs = errx.New()
+			errs.Add("password", "Invalid Password")
+			return utils.WriteHTML(
+				c,
+				http.StatusBadRequest,
+				forms.Login(loginUser.Email, loginUser.Password, &errs),
+			)
 		}
 		return c.JSON(http.StatusInternalServerError, utils.Error{
 			Message: err.Error(),

@@ -14,7 +14,7 @@ import (
 
 func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	e.Use(middleware.Logger())
-
+	e.Static("/static", "web/static")
 	us := userService.NewUserService(postgres.NewUserRepo(db), postgres.NewAccountRepo(db))
 	userService.NewUserRoutes(e, us)
 

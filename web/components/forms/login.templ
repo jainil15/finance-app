@@ -1,0 +1,23 @@
+package forms
+
+import "financeapp/pkg/errors"
+
+templ input(label, name, inputType, value string, errs *errx.Error) {
+	<div class="grid grid-cols-1 text-xl text-gray-700">
+		if errs != nil && errs.Get(name) != nil {
+			for _,err := range errs.Get(name) {
+				<span class="text-red-700">{ err }</span>
+			}
+		}
+		<label class="text-gray-500" for={ name }>{ label }</label>
+		<input name={ name } type={ inputType } value={ value } placeholder={ name } class="p-2"/>
+	</div>
+}
+
+templ Login(email, password string, errs *errx.Error) {
+	<form method="post" hx-post="/user/login" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
+		@input("Email", "email", "email", string(email), errs)
+		@input("Password", "password", "password", string(password), errs)
+		<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+	</form>
+}

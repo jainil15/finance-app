@@ -11,5 +11,8 @@ func (e Error) Add(key string, err string) {
 }
 
 func (e Error) Get(key string) []string {
-	return e[key]
+	if errs, ok := e[key]; ok {
+		return errs
+	}
+	return nil
 }

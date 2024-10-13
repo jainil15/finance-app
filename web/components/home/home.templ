@@ -1,0 +1,8 @@
+package home
+
+import "financeapp/web/layout"
+import "financeapp/web/components/forms"
+
+templ Home() {
+	@layout.Layout(forms.Login("", "", nil))
+}

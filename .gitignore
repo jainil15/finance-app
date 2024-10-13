@@ -1,4 +1,6 @@
 .envrc
 bin
 tmp
+output.css
+node_modules
 
