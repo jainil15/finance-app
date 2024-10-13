@@ -132,8 +132,10 @@ func (us UserService) GetUserInfo(userID uuid.UUID) (*model.UserAggregate, error
 		if !errors.Is(err, budget.ErrorBudgetNotFound) {
 			return nil, err
 		}
+		log.Println("Error Budget", err)
 	}
 	mUser := model.NewUserAggregate(u, t, b)
+	fmt.Println(mUser)
 	return mUser, nil
 }
 
@@ -334,17 +336,11 @@ func (u UserService) Login(c echo.Context) error {
 		Value:    token,
 	}
 	c.SetCookie(&accessTokenCookie)
-	// Set-Cookie: <cookie-name>=<cookie-value>; SameSite=None; Secure
-	// c.Response().
-	// 	Header().
-	// 	Add("Set-Cookie", fmt.Sprintf("access-token=%s; SameSite=None; Secure; Path=\"/\"", token))
-	loginRes := NewLoginResponse(
-		ToUserResponse(us),
-		token)
-	return c.JSON(
-		http.StatusOK,
-		utils.Response{
-			Result: loginRes,
-		},
-	)
+	usInfo, err := u.GetUserInfo(us.ID)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	c.Response().Header().Set("HX-Replace-Url", "/home")
+	return utils.WriteHTML(c, views.UserHome(*usInfo))
 }

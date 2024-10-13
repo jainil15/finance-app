@@ -2,7 +2,31 @@ package views
 
 import "financeapp/pkg/model"
 import "fmt"
+import "financeapp/aggregate"
+
+templ UserTransaction(t aggregate.Transaction) {
+	<div class="">
+		{ t.Category.Name.String() }
+	</div>
+}
+
+func TransactionSum(tran []aggregate.Transaction) float64 {
+	sum := 0.0
+	for _, t := range tran {
+		sum += float64(t.Transaction.Value)
+	}
+	return sum
+}
 
 templ UserHome(u model.UserAggregate) {
-	<span>{ fmt.Sprintf("%v",u) }</span>
+	<div class="px-4 p-2 bg-teal-800 text-gray-100">
+		<div class="text-xl font-semibold">{ fmt.Sprintf("%s",u.User.Name) }</div>
+		<div class="text-5xl font-extrabold">
+			{ u.User.ID.String() }
+			if u.Budget != nil {
+				{ fmt.Sprintf("%s %.2f", u.Budget.Currency, u.Budget.Value) }
+				<span class="text-xs font-normal">{ fmt.Sprintf("%.2f left", float64(u.Budget.Value) - TransactionSum(u.Transaction)) }</span>
+			}
+		</div>
+	</div>
 }

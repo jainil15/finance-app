@@ -45,13 +45,13 @@ func ToBudgetResponse(b *budget.Budget) *budgetRespose {
 
 func NewBudgetRoutes(g *echo.Group, bs *BudgetService) {
 	g.GET(
-		"user/:user_id/budget",
+		"/user/:user_id/budget",
 		bs.GetByUserID,
 		middleware.AuthMiddleware,
 		middleware.CheckUser,
 	)
-	g.POST("user/:user_id/budget", bs.Add, middleware.AuthMiddleware, middleware.CheckUser)
-	g.PUT("user/:user_id/budget", bs.Update, middleware.AuthMiddleware, middleware.CheckUser)
+	g.POST("/user/:user_id/budget", bs.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	g.PUT("/user/:user_id/budget", bs.Update, middleware.AuthMiddleware, middleware.CheckUser)
 }
 
 func (bs BudgetService) GetByUserID(c echo.Context) error {

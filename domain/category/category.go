@@ -30,3 +30,7 @@ func New(id uuid.UUID, userID uuid.UUID, name Name) *Category {
 		Name:   name,
 	}
 }
+
+func (n Name) String() string {
+	return string(n)
+}

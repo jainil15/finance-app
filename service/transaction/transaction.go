@@ -28,7 +28,12 @@ func NewTransactionService(tr repository.TransactionRepo, cr category.Repo) *Tra
 }
 
 func NewTransactionRoutes(g *echo.Group, ts *TransactionService) {
-	g.POST("/user/:user_id/transaction", ts.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	g.POST(
+		"/user/:user_id/transaction",
+		ts.Add,
+		middleware.AuthMiddleware,
+		middleware.CheckUser,
+	)
 	g.GET(
 		"/user/:user_id/transactions",
 		ts.GetByUser,
