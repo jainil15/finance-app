@@ -15,8 +15,8 @@ import (
 
 type addBudgetRequest struct {
 	UserID   uuid.UUID `param:"user_id"`
-	Currency string    `json:"currency"`
-	Value    float64   `json:"value"`
+	Currency string    `                json:"currency" form:"currency"`
+	Value    float64   `                json:"value"    form:"value"`
 }
 
 type BudgetService struct {
@@ -31,8 +31,8 @@ func NewBudgetService(budgetRepo budget.Repo) *BudgetService {
 
 type budgetRespose struct {
 	UserID   uuid.UUID       `param:"user_id"`
-	Currency budget.Currency `json:"currency"`
-	Value    float64         `json:"value"`
+	Currency budget.Currency `                json:"currency"`
+	Value    float64         `                json:"value"`
 }
 
 func ToBudgetResponse(b *budget.Budget) *budgetRespose {

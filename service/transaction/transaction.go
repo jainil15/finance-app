@@ -39,10 +39,10 @@ func NewTransactionRoutes(g *echo.Group, ts *TransactionService) {
 
 type transactionRequest struct {
 	UserID          uuid.UUID `param:"user_id"`
-	CategoryID      uuid.UUID `json:"category_id"`
-	TransactionType string    `json:"transaction_type"`
-	Currency        string    `json:"currency"`
-	Value           float64   `json:"value"`
+	CategoryID      uuid.UUID `                json:"category_id"      form:"category_id"`
+	TransactionType string    `                json:"transaction_type" form:"transaction_type"`
+	Currency        string    `                json:"currency"         form:"currency"`
+	Value           float64   `                json:"value"            form:"value"`
 }
 type transactionResponse struct {
 	ID              uuid.UUID                   `json:"id"`

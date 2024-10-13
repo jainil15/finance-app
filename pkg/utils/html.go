@@ -15,5 +15,6 @@ func RenderHtml(t templ.Component) echo.HandlerFunc {
 
 func WriteHTML(c echo.Context, t templ.Component) error {
 	c.Response().Header().Add("content-type", "text/html")
+	c.Response().WriteHeader(200)
 	return t.Render(context.Background(), c.Response().Writer)
 }

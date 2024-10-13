@@ -19,8 +19,9 @@ templ Login(email, password string, errs *errx.Error) {
 		@input("Email", "email", "email", string(email), errs)
 		@input("Password", "password", "password", string(password), errs)
 		<div>
-			<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+			<button type="submit" class="bg-blue-700 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
 			<button type="button" hx-get="/fragment/register" hx-swap="outerHTML" hx-replace-url="/register" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
+			<a href="/home">Home</a>
 		</div>
 	</form>
 }

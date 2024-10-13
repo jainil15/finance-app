@@ -3,8 +3,19 @@ package forms
 import "financeapp/pkg/errors"
 import "financeapp/pkg/model"
 
+templ errSpan(e string) {
+	<span class="bg-red-600">{ e }</span>
+}
+
 templ Register(u model.RegisterUser, errs errx.Error) {
 	<form id="user-form" method="post" hx-post="/api/user/register" hx-replace-url="/register" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
+		<span>
+			if err := errs.Get("server") ; err != nil {
+				for _, e := range err {
+					@errSpan(e)
+				}
+			}
+		</span>
 		@input("Name", "name", "text", u.Name, &errs)
 		@input("Email", "email", "email", u.Email, &errs)
 		@input("Password", "password", "password", u.Password, &errs)

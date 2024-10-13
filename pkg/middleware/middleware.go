@@ -3,6 +3,7 @@ package middleware
 import (
 	"financeapp/pkg/config"
 	"financeapp/pkg/utils"
+	"financeapp/web/components/home"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,29 +15,40 @@ import (
 
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		accessTokenString := getAccessTokenFromRequest(c.Request())
+		accessTokenCookie, err := c.Cookie("access-token")
+		if err != nil {
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			return utils.WriteHTML(c, home.Home())
+		}
+		if err := accessTokenCookie.Valid(); err != nil {
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			log.Println("Error Validity:", err)
+			return utils.WriteHTML(c, home.Home())
+		}
+		accessTokenString := accessTokenCookie.Value
+		// accessTokenString := getAccessTokenFromRequest(c.Request())
 		if accessTokenString == "" {
-			return c.JSON(http.StatusBadRequest, utils.Error{
-				Message: "Missing Access Token",
-			})
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			log.Println("Error Empty:", err)
+			return utils.WriteHTML(c, home.Home())
 		}
 		accessToken, err := validateAccessToken(accessTokenString)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, utils.Error{
-				Message: "Access Token Malformed or Expired",
-			})
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			log.Println("Error Validity:", err)
+			return utils.WriteHTML(c, home.Home())
 		}
 		if !accessToken.Valid {
-			return c.JSON(http.StatusUnauthorized, utils.Error{
-				Message: "Invalid Token",
-			})
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			log.Println("Error Invalid Again:", err)
+			return utils.WriteHTML(c, home.Home())
 		}
 
 		claims, ok := accessToken.Claims.(jwt.MapClaims)
 		if !ok {
-			return c.JSON(http.StatusUnauthorized, utils.Error{
-				Message: "Invalid Claims",
-			})
+			c.Response().Header().Add("HX-Replace-Url", "/login")
+			log.Println("Error CLAIMS:", err)
+			return utils.WriteHTML(c, home.Home())
 		}
 		log.Println(claims)
 		c.Set("user_id", claims["user_id"])
@@ -54,6 +66,7 @@ func getAccessTokenFromRequest(r *http.Request) string {
 }
 
 func validateAccessToken(accessToken string) (*jwt.Token, error) {
+	log.Printf("Token: %s\n", accessToken)
 	return jwt.Parse(
 		accessToken,
 		func(t *jwt.Token) (interface{}, error) {

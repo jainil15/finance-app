@@ -1,0 +1,8 @@
+package views
+
+import "financeapp/pkg/model"
+import "fmt"
+
+templ UserHome(u model.UserAggregate) {
+	<span>{ fmt.Sprintf("%v",u) }</span>
+}

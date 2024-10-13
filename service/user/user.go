@@ -3,11 +3,17 @@ package userService
 import (
 	"errors"
 	"financeapp/domain/account"
+	"financeapp/domain/budget"
+	"financeapp/domain/category"
 	"financeapp/domain/user"
 	errx "financeapp/pkg/errors"
 	"financeapp/pkg/middleware"
+	"financeapp/pkg/model"
 	"financeapp/pkg/utils"
+	"financeapp/repository/repository"
 	"financeapp/web/components/forms"
+	"financeapp/web/layout"
+	"financeapp/web/views"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,9 +24,9 @@ import (
 )
 
 type UserRegister struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name"     form:"name"`
+	Email    string `json:"email"    form:"email"`
+	Password string `json:"password" form:"password"`
 }
 type userResponse struct {
 	ID    uuid.UUID  `json:"id"`
@@ -37,8 +43,11 @@ type registerResponse struct {
 }
 
 type UserService struct {
-	userRepo    user.Repo
-	accountRepo account.Repo
+	userRepo        user.Repo
+	accountRepo     account.Repo
+	transactionRepo repository.TransactionRepo
+	categoryRepo    category.Repo
+	budgetRepo      budget.Repo
 }
 type LoginRequest struct {
 	Email    string `json:"email"    form:"email"    validate:"email"`
@@ -86,10 +95,61 @@ func NewUserRoutes(g *echo.Group, ur *UserService) {
 	g.POST("/user/login", ur.Login)
 }
 
-func NewUserService(ur user.Repo, ar account.Repo) *UserService {
+func (us UserService) GetUserInfoView(c echo.Context) error {
+	u := c.Get("user_id")
+	log.Printf("USERID: %v\n", u)
+	userIDString, ok := u.(string)
+	if !ok {
+		return c.JSON(400, utils.Error{
+			Message: errors.New("Invalid UUID").Error(),
+		})
+	}
+	userID, err := uuid.Parse(userIDString)
+	if err != nil {
+		return err
+	}
+	userInfo, err := us.GetUserInfo(userID)
+	if err != nil {
+		return c.JSON(400, utils.Error{
+			Message: errors.New("Invalid UUID").Error(),
+		})
+	}
+	return utils.WriteHTML(c, layout.Layout(views.UserHome(*userInfo)))
+}
+
+func (us UserService) GetUserInfo(userID uuid.UUID) (*model.UserAggregate, error) {
+	u, err := us.userRepo.GetById(userID)
+	if err != nil {
+		return nil, user.ErrorUserNotFound
+	}
+
+	t, err := us.transactionRepo.GetByUserId(userID)
+	if err != nil {
+		return nil, err
+	}
+	b, err := us.budgetRepo.GetByUserID(userID)
+	if err != nil {
+		if !errors.Is(err, budget.ErrorBudgetNotFound) {
+			return nil, err
+		}
+	}
+	mUser := model.NewUserAggregate(u, t, b)
+	return mUser, nil
+}
+
+func NewUserService(
+	ur user.Repo,
+	ar account.Repo,
+	tr repository.TransactionRepo,
+	cr category.Repo,
+	br budget.Repo,
+) *UserService {
 	return &UserService{
-		userRepo:    ur,
-		accountRepo: ar,
+		userRepo:        ur,
+		accountRepo:     ar,
+		transactionRepo: tr,
+		categoryRepo:    cr,
+		budgetRepo:      br,
 	}
 }
 
@@ -109,26 +169,54 @@ func (lr *LoginRequest) ValidateUserLogin() errx.Error {
 
 func (u UserService) Register(c echo.Context) error {
 	userRegister := UserRegister{}
-	c.Bind(&userRegister)
+	err := c.Bind(&userRegister)
+	if err != nil {
+		errs := errx.New()
+		errs.Add("server", err.Error())
+		return utils.WriteHTML(
+			c,
+			forms.Register(
+				model.NewRegisterUser(userRegister.Name, userRegister.Email, userRegister.Password),
+				errs,
+			),
+		)
+	}
 	newUser, err := user.NewUser(userRegister.Name, userRegister.Email, userRegister.Password)
 	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"errs": fmt.Sprintf("%s", err),
-		})
+		errs := errx.New()
+		errs.Add("server", err.Error())
+		return utils.WriteHTML(
+			c,
+			forms.Register(
+				model.NewRegisterUser(userRegister.Name, userRegister.Email, userRegister.Password),
+				errs,
+			),
+		)
 	}
 	newAccount := account.New(newUser.ID)
 	_, err = u.userRepo.Add(newUser)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"errs": fmt.Sprintf("%s", err),
-		})
+		errs := errx.New()
+		errs.Add("server", err.Error())
+		return utils.WriteHTML(
+			c,
+			forms.Register(
+				model.NewRegisterUser(userRegister.Name, userRegister.Email, userRegister.Password),
+				errs,
+			),
+		)
 	}
 	_, err = u.accountRepo.Add(newAccount)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"errs": fmt.Sprintf("%s", err),
-		})
+		errs := errx.New()
+		errs.Add("server", err.Error())
+		return utils.WriteHTML(
+			c,
+			forms.Register(
+				model.NewRegisterUser(userRegister.Name, userRegister.Email, userRegister.Password),
+				errs,
+			),
+		)
 	}
 	ar := ToAccountResponse(newAccount)
 	ur := ToUserResponse(newUser)
@@ -238,6 +326,18 @@ func (u UserService) Login(c echo.Context) error {
 			forms.Login(loginUser.Email, loginUser.Password, &errs),
 		)
 	}
+	accessTokenCookie := http.Cookie{
+		Name:     "access-token",
+		SameSite: http.SameSiteDefaultMode,
+		MaxAge:   8000000,
+		Path:     "/",
+		Value:    token,
+	}
+	c.SetCookie(&accessTokenCookie)
+	// Set-Cookie: <cookie-name>=<cookie-value>; SameSite=None; Secure
+	// c.Response().
+	// 	Header().
+	// 	Add("Set-Cookie", fmt.Sprintf("access-token=%s; SameSite=None; Secure; Path=\"/\"", token))
 	loginRes := NewLoginResponse(
 		ToUserResponse(us),
 		token)

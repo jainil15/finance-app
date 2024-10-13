@@ -13,7 +13,7 @@ func Run() {
 	env := config.Env
 	db := postgres.New(env.DBUser, env.DBPassword, env.DBHost, env.DBPort, env.DBName)
 	e := echo.New()
-	routes.AddViews(e)
+	routes.AddViews(e, db)
 	routes.AddRoutes(e, db)
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", env.Port)))
 }

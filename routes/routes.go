@@ -16,7 +16,13 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	e.Use(middleware.Logger())
 	e.Static("/static", "web/static")
 	g := e.Group("/api")
-	us := userService.NewUserService(postgres.NewUserRepo(db), postgres.NewAccountRepo(db))
+	us := userService.NewUserService(
+		postgres.NewUserRepo(db),
+		postgres.NewAccountRepo(db),
+		postgres.NewTransactionRepo(db),
+		postgres.NewCategoryRepo(db),
+		postgres.NewBudgetRepo(db),
+	)
 	userService.NewUserRoutes(g, us)
 
 	bs := budgetService.NewBudgetService(postgres.NewBudgetRepo(db))

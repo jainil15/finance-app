@@ -35,7 +35,7 @@ func NewCategoryRoutes(g *echo.Group, cs *CategoryService) {
 
 type catergoryRequest struct {
 	UserID uuid.UUID `param:"user_id"`
-	Name   string    `                json:"name"`
+	Name   string    `                json:"name" form:"name"`
 }
 type catergoryRespone struct {
 	ID     uuid.UUID `json:"id"`

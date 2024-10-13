@@ -2,13 +2,17 @@ package routes
 
 import (
 	"context"
+	"financeapp/pkg/middleware"
 	"financeapp/pkg/model"
+	"financeapp/repository/postgres"
+	userService "financeapp/service/user"
 	"financeapp/web/components/forms"
 	"financeapp/web/components/home"
 	"financeapp/web/layout"
 	"financeapp/web/views"
 
 	"github.com/a-h/templ"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +23,7 @@ func RenderHtml(t templ.Component) echo.HandlerFunc {
 	}
 }
 
-func AddViews(e *echo.Echo) {
+func AddViews(e *echo.Echo, db *sqlx.DB) {
 	e.GET("/", RenderHtml(views.Home()))
 	e.GET("/login", RenderHtml(layout.Layout(home.Home())))
 	e.GET("/register", RenderHtml(layout.Layout(forms.Register(model.RegisterUser{}, nil))))
@@ -28,4 +32,13 @@ func AddViews(e *echo.Echo) {
 		"/fragment/register",
 		RenderHtml(forms.Register(model.RegisterUser{}, nil)),
 	)
+
+	us := userService.NewUserService(
+		postgres.NewUserRepo(db),
+		postgres.NewAccountRepo(db),
+		postgres.NewTransactionRepo(db),
+		postgres.NewCategoryRepo(db),
+		postgres.NewBudgetRepo(db),
+	)
+	e.GET("/home", us.GetUserInfoView, middleware.AuthMiddleware)
 }
