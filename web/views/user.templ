@@ -70,9 +70,13 @@ templ TransactionList(tr []aggregate.Transaction) {
 }
 
 templ UserHome(u model.UserAggregate) {
-	<div class="flex justify-between items-center">
-		@UserBudgetStat(u)
-		@forms.TransactionForm(u.UserID, u.Category)
-	</div>
-	@TransactionList(u.Transaction)
+	if u.Budget == nil {
+		@forms.BudgetFrom(u.User.ID)
+	} else {
+		<div class="flex justify-between items-center">
+			@UserBudgetStat(u)
+			@forms.TransactionForm(u.User.ID, u.Category)
+		</div>
+		@TransactionList(u.Transaction)
+	}
 }

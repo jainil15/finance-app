@@ -1,0 +1,19 @@
+package forms
+
+import "github.com/google/uuid"
+import "fmt"
+
+templ BudgetFrom(userID uuid.UUID) {
+	<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
+		//	<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
+		<form hx-post={ fmt.Sprintf("/api/user/%s/budget", userID) } class="flex flex-col w-50 self-center">
+			<div class="">
+				@TransactionFormInput("number", "Amount", "value", "Amount", "")
+				<div class="join-item">
+					@TransactionCurrencySelectMenu()
+				</div>
+			</div>
+			<button type="submit" class="btn">Add Budget</button>
+		</form>
+	</div>
+}

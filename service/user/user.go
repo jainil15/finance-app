@@ -136,6 +136,7 @@ func (us UserService) GetUserInfoView(c echo.Context) error {
 			Message: errors.New("Invalid UUID").Error(),
 		})
 	}
+	log.Println("The is nil = UserID: ", userInfo.User.ID)
 	return utils.WriteHTML(c, layout.Layout(views.UserHome(*userInfo)))
 }
 

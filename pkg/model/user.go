@@ -13,10 +13,10 @@ type RegisterUser struct {
 	Password string
 }
 type UserAggregate struct {
-	user.User
+	User        user.User
 	Transaction []aggregate.Transaction
 	Category    []category.Category
-	*budget.Budget
+	Budget      *budget.Budget
 }
 
 func NewUserAggregate(

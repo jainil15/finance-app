@@ -110,6 +110,8 @@ func (bs BudgetService) Add(c echo.Context) error {
 			Message: "Error adding budget",
 		})
 	}
+	c.Response().Header().Add("HX-Redirect", "/home")
+	c.Response().WriteHeader(200)
 	return c.JSON(http.StatusCreated, utils.Response{
 		Message: "Budget Created",
 		Result:  ToBudgetResponse(b),
@@ -155,6 +157,8 @@ func (bs BudgetService) Update(c echo.Context) error {
 			Message: "Error updating budget",
 		})
 	}
+	c.Response().Header().Add("HX-Redirect", "/home")
+	c.Response().WriteHeader(200)
 	return c.JSON(http.StatusCreated, utils.Response{
 		Message: "Budget Created",
 		Result:  ToBudgetResponse(b),
