@@ -4,6 +4,7 @@ import "financeapp/pkg/model"
 import "fmt"
 import "financeapp/aggregate"
 import "financeapp/web/components/forms"
+import "financeapp/domain/transaction"
 
 templ UserTransaction(t aggregate.Transaction) {
 	<div class="">
@@ -14,7 +15,11 @@ templ UserTransaction(t aggregate.Transaction) {
 func TransactionSum(tran []aggregate.Transaction) float64 {
 	sum := 0.0
 	for _, t := range tran {
-		sum += float64(t.Transaction.Value)
+		if t.Transaction.TransactionType == transaction.Expense {
+			sum += float64(t.Transaction.Value)
+		} else {
+			sum -= float64(t.Transaction.Value)
+		}
 	}
 	return sum
 }
@@ -29,7 +34,43 @@ templ UserBudgetStat(u model.UserAggregate) {
 	</div>
 }
 
+templ TransactionList(tr []aggregate.Transaction) {
+	<div class="overflow-x-auto">
+		<table class="table">
+			<!-- head -->
+			<thead>
+				<tr>
+					<th></th>
+					<th>Transaction Type</th>
+					<th>Cost</th>
+					<th>Category</th>
+				</tr>
+			</thead>
+			<tbody>
+				for i, t := range tr {
+					if t.Transaction.TransactionType == transaction.Expense {
+						<tr class={ "bg-error",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
+							<th>{ string(i) }</th>
+							<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
+							<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
+							<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
+						</tr>
+					} else {
+						<tr class={ "bg-success",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
+							<th>{ string(i) }</th>
+							<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
+							<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
+							<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
 templ UserHome(u model.UserAggregate) {
 	@UserBudgetStat(u)
 	@forms.TransactionForm(u.ID, u.Category)
+	@TransactionList(u.Transaction)
 }
