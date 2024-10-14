@@ -40,5 +40,11 @@ func AddViews(e *echo.Echo, db *sqlx.DB) {
 		postgres.NewCategoryRepo(db),
 		postgres.NewBudgetRepo(db),
 	)
+	e.GET(
+		"/fragment/user/:user_id/transaction-form",
+		us.TransactionForm,
+		middleware.AuthMiddleware,
+		middleware.CheckUser,
+	)
 	e.GET("/home", us.GetUserInfoView, middleware.AuthMiddleware)
 }

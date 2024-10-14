@@ -5,7 +5,7 @@ import "financeapp/domain/category"
 import "github.com/google/uuid"
 
 templ TransactionFormInput(inputType, label, name, placeHolder, value string, classNames ...string) {
-	<label class="form-control max-w-xs">
+	<label class="form-control join-item max-w-xs">
 		<div class="label">
 			<span class="label-text">{ label }</span>
 		</div>
@@ -17,7 +17,7 @@ templ TransactionTypeRadio() {
 	<div class="w-full max-w-xs">
 		<div class="flex w-full gap-4">
 			<label class="flex gap-2 flex-row items-center">
-				<input type="radio" name="transaction_type" class="radio" value="income" checked="checked"/>
+				<input type="radio" name="transaction_type" class="radio" value="expense" checked="checked"/>
 				<div class="label">
 					<span class="label-text">{ "Expense" }</span>
 				</div>
@@ -47,9 +47,9 @@ templ TransactionCategorySelectMenu(ct []category.Category) {
 }
 
 templ TransactionCurrencySelectMenu() {
-	<label class="form-control w-full max-w-xs">
+	<label class="form-control join-item w-28 max-w-xs">
 		<div class="label">
-			<span class="label-text">Select currency</span>
+			<span class="label-text">Currency</span>
 		</div>
 		<select name="currency" class="select select-bordered">
 			<option disabled selected>Pick one</option>
@@ -60,13 +60,24 @@ templ TransactionCurrencySelectMenu() {
 }
 
 templ TransactionForm(userID uuid.UUID, ct []category.Category) {
-	<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
-		<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
-			@TransactionCurrencySelectMenu()
-			@TransactionFormInput("number", "Value", "value", "Amount", "0")
-			@TransactionTypeRadio()
-			@TransactionCategorySelectMenu(ct)
-			<button type="submit">Submit</button>
-		</form>
-	</div>
+	<!-- You can open the modal using ID.showModal() method -->
+	<button class="btn" onclick="my_modal_3.showModal()">Add transaction</button>
+	<dialog id="my_modal_3" class="modal">
+		<div class="modal-box">
+			<form method="dialog">
+				<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+			</form>
+			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
+				<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
+					<div class="join">
+						@TransactionCurrencySelectMenu()
+						@TransactionFormInput("number", "Value", "value", "Amount", "0")
+					</div>
+					@TransactionTypeRadio()
+					@TransactionCategorySelectMenu(ct)
+					<button type="submit" class="btn">Submit</button>
+				</form>
+			</div>
+		</div>
+	</dialog>
 }

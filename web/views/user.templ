@@ -3,8 +3,8 @@ package views
 import "financeapp/pkg/model"
 import "fmt"
 import "financeapp/aggregate"
-import "financeapp/web/components/forms"
 import "financeapp/domain/transaction"
+import "financeapp/web/components/forms"
 
 templ UserTransaction(t aggregate.Transaction) {
 	<div class="">
@@ -70,7 +70,9 @@ templ TransactionList(tr []aggregate.Transaction) {
 }
 
 templ UserHome(u model.UserAggregate) {
-	@UserBudgetStat(u)
-	@forms.TransactionForm(u.ID, u.Category)
+	<div class="flex justify-between items-center">
+		@UserBudgetStat(u)
+		@forms.TransactionForm(u.UserID, u.Category)
+	</div>
 	@TransactionList(u.Transaction)
 }

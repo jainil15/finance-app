@@ -95,6 +95,28 @@ func NewUserRoutes(g *echo.Group, ur *UserService) {
 	g.POST("/user/login", ur.Login)
 }
 
+func (us UserService) TransactionForm(c echo.Context) error {
+	u := c.Get("user_id")
+	log.Printf("USERID: %v\n", u)
+	userIDString, ok := u.(string)
+	if !ok {
+		return c.JSON(400, utils.Error{
+			Message: errors.New("Invalid UUID").Error(),
+		})
+	}
+	userID, err := uuid.Parse(userIDString)
+	if err != nil {
+		return err
+	}
+	cat, err := us.categoryRepo.GetByUserID(userID)
+	if err != nil {
+		return c.JSON(400, utils.Error{
+			Message: err.Error(),
+		})
+	}
+	return utils.WriteHTML(c, forms.TransactionForm(userID, cat))
+}
+
 func (us UserService) GetUserInfoView(c echo.Context) error {
 	u := c.Get("user_id")
 	log.Printf("USERID: %v\n", u)
