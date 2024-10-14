@@ -254,12 +254,10 @@ func (u UserService) Register(c echo.Context) error {
 	}
 	ar := ToAccountResponse(newAccount)
 	ur := ToUserResponse(newUser)
-	res := NewRegisterResponse(ur, ar)
-	c.JSON(http.StatusOK, utils.Response{
-		Message: "User Created",
-		Result:  res,
-	})
-	return nil
+	_ = NewRegisterResponse(ur, ar)
+	c.Response().Header().Add("HX-Redirect", "/home")
+	c.Response().WriteHeader(303)
+	return c.Redirect(http.StatusSeeOther, "/home")
 }
 
 func (u UserService) GetAll(c echo.Context) error {
