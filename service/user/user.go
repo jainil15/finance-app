@@ -228,7 +228,7 @@ func (u UserService) Register(c echo.Context) error {
 		)
 	}
 	newAccount := account.New(newUser.ID)
-	_, err = u.userRepo.Add(newUser)
+	newUser, err = u.userRepo.Add(newUser)
 	if err != nil {
 		errs := errx.New()
 		errs.Add("server", err.Error())
@@ -252,6 +252,30 @@ func (u UserService) Register(c echo.Context) error {
 			),
 		)
 	}
+	token, err := utils.CreateToken(newUser)
+	if err != nil {
+		errs := errx.New()
+		errs.Add("server", "Internal server error")
+		return utils.WriteHTML(
+			c,
+			forms.Register(
+				model.NewRegisterUser(
+					string(userRegister.Name),
+					string(userRegister.Email),
+					userRegister.Password,
+				),
+				errs,
+			),
+		)
+	}
+	accessTokenCookie := http.Cookie{
+		Name:     "access-token",
+		SameSite: http.SameSiteDefaultMode,
+		MaxAge:   8000000,
+		Path:     "/",
+		Value:    token,
+	}
+	c.SetCookie(&accessTokenCookie)
 	ar := ToAccountResponse(newAccount)
 	ur := ToUserResponse(newUser)
 	_ = NewRegisterResponse(ur, ar)

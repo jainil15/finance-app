@@ -3,7 +3,7 @@ package forms
 import "financeapp/pkg/errors"
 
 templ input(label, name, inputType, value string, errs *errx.Error) {
-	<div class="grid grid-cols-1 text-xl text-gray-700">
+	<div class="grid grid-cols-1 text-xl">
 		if errs != nil && errs.Get(name) != nil {
 			for _,err := range errs.Get(name) {
 				<span class="text-red-700">{ err }</span>
@@ -18,9 +18,11 @@ templ Login(email, password string, errs *errx.Error) {
 	<form id="user-form" method="post" hx-post="/api/user/login" hx-replace-url="/login" hx-swap="outerHTML" class="flex flex-col gap-2 items-center">
 		@input("Email", "email", "email", string(email), errs)
 		@input("Password", "password", "password", string(password), errs)
+		<p class="text-sm">
+			If you don't have an account <a hx-get="/fragment/register" hx-replace-url="/register" hx-target="#user-form" class="link link-secondary">Register</a> using this link
+		</p>
 		<div>
-			<button type="submit" class="bg-blue-700 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
-			<button type="button" hx-get="/fragment/register" hx-swap="outerHTML" hx-replace-url="/register" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
+			<button type="submit" class="btn btn-primary ">Login</button>
 		</div>
 	</form>
 }

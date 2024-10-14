@@ -19,9 +19,11 @@ templ Register(u model.RegisterUser, errs errx.Error) {
 		@input("Name", "name", "text", u.Name, &errs)
 		@input("Email", "email", "email", u.Email, &errs)
 		@input("Password", "password", "password", u.Password, &errs)
-		<div>
-			<button type="submit" class="bg-black hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
-			<button type="button" hx-get="/fragment/login" hx-swap="outerHTML" hx-replace-url="/login" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
+		<p class="text-sm">
+			If you already have an account <a hx-get="/fragment/login" hx-replace-url="/login" hx-target="#user-form" class="link link-secondary">Login</a> using this link
+		</p>
+		<div class="flex flex-row gap-2">
+			<button type="submit" class="btn btn-primary w-20">Register</button>
 		</div>
 	</form>
 }
