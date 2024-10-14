@@ -3,7 +3,6 @@ package middleware
 import (
 	"financeapp/pkg/config"
 	"financeapp/pkg/utils"
-	"financeapp/web/components/home"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,37 +17,32 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		accessTokenCookie, err := c.Cookie("access-token")
 		if err != nil {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		if err := accessTokenCookie.Valid(); err != nil {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			log.Println("Error Validity:", err)
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		accessTokenString := accessTokenCookie.Value
 		// accessTokenString := getAccessTokenFromRequest(c.Request())
 		if accessTokenString == "" {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			log.Println("Error Empty:", err)
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		accessToken, err := validateAccessToken(accessTokenString)
 		if err != nil {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			log.Println("Error Validity:", err)
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		if !accessToken.Valid {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			log.Println("Error Invalid Again:", err)
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 
 		claims, ok := accessToken.Claims.(jwt.MapClaims)
 		if !ok {
 			c.Response().Header().Add("HX-Redirect", "/login")
-			log.Println("Error CLAIMS:", err)
-			return utils.WriteHTML(c, home.Home())
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		log.Println(claims)
 		c.Set("user_id", claims["user_id"])

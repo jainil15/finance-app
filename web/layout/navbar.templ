@@ -3,36 +3,37 @@ package layout
 import "financeapp/domain/user"
 import "fmt"
 
+templ RemoveCookiesScript() {
+	<script>
+    function deleteAllCookies() {
+      const cookies = document.cookie.split("; ");
+      for (let cookie of cookies) {
+        const cookieName = cookie.split("=")[0];
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      }
+    }
+  </script>
+}
+
 templ Navbar() {
+	@RemoveCookiesScript()
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
-			<a class="btn btn-ghost text-xl">Finance App</a>
-		</div>
-		<div class="flex-none">
-			<ul class="menu menu-horizontal px-1">
-				<li><a>Link</a></li>
-				<li>
-					<details>
-						<summary>Parent</summary>
-						<ul class="bg-base-100 rounded-t-none p-2">
-							<li><a>Link 1</a></li>
-							<li><a>Link 2</a></li>
-						</ul>
-					</details>
-				</li>
-			</ul>
+			<a class="btn btn-ghost text-xl" href="/home">Finance App</a>
 		</div>
 	</div>
 }
 
 templ NavbarWithUser(u user.User) {
+	@RemoveCookiesScript()
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
-			<a class="btn btn-ghost text-xl">Finanace App</a>
+			<a class="btn btn-ghost text-xl" href="/home">Finance App</a>
 		</div>
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1">
-				<li><a>{ fmt.Sprintf("%s", u.Name) }</a></li>
+				<li><h5>{ fmt.Sprintf("%s", u.Name) }</h5></li>
+				<li><a href="/" hx-post="/api/user/logout">Logout</a></li>
 			</ul>
 		</div>
 	</div>

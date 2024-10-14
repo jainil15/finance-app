@@ -10,7 +10,7 @@ templ input(label, name, inputType, value string, errs *errx.Error) {
 			}
 		}
 		<label class="text-gray-500" for={ name }>{ label }</label>
-		<input name={ name } type={ inputType } value={ value } placeholder={ name } class="p-2"/>
+		<input name={ name } type={ inputType } value={ value } placeholder={ name } class="input input-bordered w-full max-w-xs"/>
 	</div>
 }
 
@@ -21,7 +21,6 @@ templ Login(email, password string, errs *errx.Error) {
 		<div>
 			<button type="submit" class="bg-blue-700 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Login</button>
 			<button type="button" hx-get="/fragment/register" hx-swap="outerHTML" hx-replace-url="/register" hx-target="#user-form" class="bg-blue-600 hover:bg-white text-white hover:text-black p-2 px-5 text-xl rounded-sm">Register</button>
-			<a href="/home">Home</a>
 		</div>
 	</form>
 }

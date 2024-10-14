@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -89,10 +90,11 @@ func ToAccountResponse(a *account.Account) *accountResponse {
 
 // NOTE: maybe move to routes package
 func NewUserRoutes(g *echo.Group, ur *UserService) {
-	g.POST("/user/register", ur.Register)
 	g.GET("/user", middleware.AuthMiddleware(ur.GetAll))
-	g.GET("/user/:user_id", middleware.AuthMiddleware(middleware.CheckUser(ur.GetById)))
+	g.POST("/user/register", ur.Register)
 	g.POST("/user/login", ur.Login)
+	g.POST("/user/logout", ur.Logout)
+	g.GET("/user/:user_id", middleware.AuthMiddleware(middleware.CheckUser(ur.GetById)))
 }
 
 func (us UserService) TransactionForm(c echo.Context) error {
@@ -373,4 +375,17 @@ func (u UserService) Login(c echo.Context) error {
 	}
 	c.Response().Header().Set("HX-Redirect", "/home")
 	return utils.WriteHTML(c, views.UserHome(*usInfo))
+}
+
+func (u UserService) Logout(c echo.Context) error {
+	cookies := c.Cookies()
+	for _, cookie := range cookies {
+		cookie.Expires = time.Unix(0, 0)
+		cookie.MaxAge = 0
+		cookie.Path = "/"
+		c.SetCookie(cookie)
+	}
+	c.Response().Header().Add("HX-Redirect", "/")
+	c.Response().WriteHeader(200)
+	return c.Redirect(http.StatusSeeOther, "/")
 }

@@ -9,7 +9,6 @@ import (
 	"financeapp/web/components/forms"
 	"financeapp/web/components/home"
 	"financeapp/web/layout"
-	"financeapp/web/views"
 
 	"github.com/a-h/templ"
 	"github.com/jmoiron/sqlx"
@@ -24,9 +23,12 @@ func RenderHtml(t templ.Component) echo.HandlerFunc {
 }
 
 func AddViews(e *echo.Echo, db *sqlx.DB) {
-	e.GET("/", RenderHtml(views.Home()))
-	e.GET("/login", RenderHtml(layout.Layout(home.Home())))
-	e.GET("/register", RenderHtml(layout.Layout(forms.Register(model.RegisterUser{}, nil))))
+	e.GET("/", RenderHtml(layout.Layout(layout.Navbar(), home.Home())))
+	e.GET("/login", RenderHtml(layout.Layout(layout.Navbar(), home.Home())))
+	e.GET(
+		"/register",
+		RenderHtml(layout.Layout(layout.Navbar(), forms.Register(model.RegisterUser{}, nil))),
+	)
 	e.GET("/fragment/login", RenderHtml(home.Home()))
 	e.GET(
 		"/fragment/register",
