@@ -1,0 +1,11 @@
+package forms
+
+import "github.com/google/uuid"
+import "fmt"
+
+templ CategoryForm(userID uuid.UUID) {
+	<form hx-post={ fmt.Sprintf("/user/%s/category", userID.String()) }>
+		@TransactionFormInput("text", "Category", "name", "CategoryName", "")
+		<button type="submit">Add</button>
+	</form>
+}

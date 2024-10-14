@@ -32,18 +32,30 @@ templ TransactionTypeRadio() {
 	</div>
 }
 
-templ TransactionCategorySelectMenu(ct []category.Category) {
-	<label class="form-control w-full max-w-xs">
-		<div class="label">
-			<span class="label-text">Select category</span>
-		</div>
-		<select name="category_id" class="select select-bordered">
-			<option disabled selected>Pick one</option>
-			for _, i := range ct {
-				<option value={ i.ID.String() }>{ string(i.Name) }</option>
-			}
-		</select>
-	</label>
+templ AddCategoryForm(userID uuid.UUID) {
+	<div class="flex items-center">
+		<input type="text" name="name" placeholder="Category" class="input input-bordered w-full max-w-xs %s"/>
+		<button type="button" class="btn" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/api/user/%s/category", userID) } hx-target="#category-select">Add Category</button>
+	</div>
+}
+
+templ TransactionCategorySelectMenu(userID uuid.UUID, ct []category.Category) {
+	if len(ct) ==  0 {
+		@AddCategoryForm(userID)
+	} else {
+		<label class="form-control w-full max-w-xs">
+			<div class="label">
+				<span class="label-text">Select category</span>
+			</div>
+			<select name="category_id" class="select select-bordered">
+				<option disabled selected>Pick one</option>
+				for _, i := range ct {
+					<option value={ i.ID.String() }>{ string(i.Name) }</option>
+				}
+			</select>
+		</label>
+		<!--@AddCategoryForm(userID)-->
+	}
 }
 
 templ TransactionCurrencySelectMenu() {
@@ -74,7 +86,9 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 						@TransactionFormInput("number", "Value", "value", "Amount", "0")
 					</div>
 					@TransactionTypeRadio()
-					@TransactionCategorySelectMenu(ct)
+					<div id="category-select" class="flex flex-row">
+						@TransactionCategorySelectMenu(userID, ct)
+					</div>
 					<button type="submit" class="btn">Submit</button>
 				</form>
 			</div>

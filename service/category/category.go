@@ -6,6 +6,7 @@ import (
 	errx "financeapp/pkg/errors"
 	"financeapp/pkg/middleware"
 	"financeapp/pkg/utils"
+	"financeapp/web/components/fragments"
 	"fmt"
 	"net/http"
 
@@ -30,7 +31,7 @@ func NewCategoryRoutes(g *echo.Group, cs *CategoryService) {
 		middleware.AuthMiddleware,
 		middleware.CheckUser,
 	)
-	g.POST("/user/:user_id/categories", cs.Add, middleware.AuthMiddleware, middleware.CheckUser)
+	g.POST("/user/:user_id/category", cs.Add, middleware.AuthMiddleware, middleware.CheckUser)
 }
 
 type catergoryRequest struct {
@@ -85,10 +86,11 @@ func (cs CategoryService) Add(c echo.Context) error {
 			Message: "Internal server error",
 		})
 	}
-	return c.JSON(http.StatusCreated, utils.Response{
-		Result:  ToCategoryRespose(cat),
-		Message: "Category created",
-	})
+	cats, err := cs.catergoryRepo.GetByUserID(categoryReq.UserID)
+	if err != nil {
+		return err
+	}
+	return utils.WriteHTML(c, fragments.CategorySelect(categoryReq.UserID, cats))
 }
 
 func (cs CategoryService) GetByUser(c echo.Context) error {

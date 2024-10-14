@@ -1,0 +1,9 @@
+package fragments
+
+import "financeapp/domain/category"
+import "financeapp/web/components/forms"
+import "github.com/google/uuid"
+
+templ CategorySelect(userID uuid.UUID, cats []category.Category) {
+	@forms.TransactionCategorySelectMenu(userID, cats)
+}
