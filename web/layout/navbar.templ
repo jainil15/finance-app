@@ -1,0 +1,39 @@
+package layout
+
+import "financeapp/domain/user"
+import "fmt"
+
+templ Navbar() {
+	<div class="navbar bg-base-100">
+		<div class="flex-1">
+			<a class="btn btn-ghost text-xl">Finance App</a>
+		</div>
+		<div class="flex-none">
+			<ul class="menu menu-horizontal px-1">
+				<li><a>Link</a></li>
+				<li>
+					<details>
+						<summary>Parent</summary>
+						<ul class="bg-base-100 rounded-t-none p-2">
+							<li><a>Link 1</a></li>
+							<li><a>Link 2</a></li>
+						</ul>
+					</details>
+				</li>
+			</ul>
+		</div>
+	</div>
+}
+
+templ NavbarWithUser(u user.User) {
+	<div class="navbar bg-base-100">
+		<div class="flex-1">
+			<a class="btn btn-ghost text-xl">Finanace App</a>
+		</div>
+		<div class="flex-none">
+			<ul class="menu menu-horizontal px-1">
+				<li><a>{ fmt.Sprintf("%s", u.Name) }</a></li>
+			</ul>
+		</div>
+	</div>
+}

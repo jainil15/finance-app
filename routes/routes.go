@@ -18,8 +18,7 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	g := e.Group("/api")
 	us := userService.NewUserService(
 		postgres.NewUserRepo(db),
-		postgres.NewAccountRepo(db),
-		postgres.NewTransactionRepo(db),
+		postgres.NewAccountRepo(db), postgres.NewTransactionRepo(db),
 		postgres.NewCategoryRepo(db),
 		postgres.NewBudgetRepo(db),
 	)

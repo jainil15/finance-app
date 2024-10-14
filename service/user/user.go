@@ -137,7 +137,10 @@ func (us UserService) GetUserInfoView(c echo.Context) error {
 		})
 	}
 	log.Println("The is nil = UserID: ", userInfo.User.ID)
-	return utils.WriteHTML(c, layout.Layout(views.UserHome(*userInfo)))
+	return utils.WriteHTML(
+		c,
+		layout.Layout(layout.NavbarWithUser(userInfo.User), views.UserHome(*userInfo)),
+	)
 }
 
 func (us UserService) GetUserInfo(userID uuid.UUID) (*model.UserAggregate, error) {
@@ -368,6 +371,6 @@ func (u UserService) Login(c echo.Context) error {
 		log.Println(err)
 		return err
 	}
-	c.Response().Header().Set("HX-Replace-Url", "/home")
+	c.Response().Header().Set("HX-Redirect", "/home")
 	return utils.WriteHTML(c, views.UserHome(*usInfo))
 }
