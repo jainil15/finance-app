@@ -1,0 +1,72 @@
+package forms
+
+import "fmt"
+import "financeapp/domain/category"
+import "github.com/google/uuid"
+
+templ TransactionFormInput(inputType, label, name, placeHolder, value string, classNames ...string) {
+	<label class="form-control max-w-xs">
+		<div class="label">
+			<span class="label-text">{ label }</span>
+		</div>
+		<input type={ inputType } name={ name } placeholder={ placeHolder } class={ fmt.Sprintf("input input-bordered w-full max-w-xs %s", classNames) }/>
+	</label>
+}
+
+templ TransactionTypeRadio() {
+	<div class="w-full max-w-xs">
+		<div class="flex w-full gap-4">
+			<label class="flex gap-2 flex-row items-center">
+				<input type="radio" name="transaction_type" class="radio" value="income" checked="checked"/>
+				<div class="label">
+					<span class="label-text">{ "Expense" }</span>
+				</div>
+			</label>
+			<label class="flex gap-2 flex-row items-center">
+				<input type="radio" name="transaction_type" value="income" class="radio"/>
+				<div class="label">
+					<span class="label-text">{ "Income" }</span>
+				</div>
+			</label>
+		</div>
+	</div>
+}
+
+templ TransactionCategorySelectMenu(ct []category.Category) {
+	<label class="form-control w-full max-w-xs">
+		<div class="label">
+			<span class="label-text">Select category</span>
+		</div>
+		<select name="category_id" class="select select-bordered">
+			<option disabled selected>Pick one</option>
+			for _, i := range ct {
+				<option value={ i.ID.String() }>{ string(i.Name) }</option>
+			}
+		</select>
+	</label>
+}
+
+templ TransactionCurrencySelectMenu() {
+	<label class="form-control w-full max-w-xs">
+		<div class="label">
+			<span class="label-text">Select currency</span>
+		</div>
+		<select name="currency" class="select select-bordered">
+			<option disabled selected>Pick one</option>
+			<option value="INR">INR</option>
+			<option value="USD">USD</option>
+		</select>
+	</label>
+}
+
+templ TransactionForm(userID uuid.UUID, ct []category.Category) {
+	<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
+		<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
+			@TransactionCurrencySelectMenu()
+			@TransactionFormInput("number", "Value", "value", "Amount", "0")
+			@TransactionTypeRadio()
+			@TransactionCategorySelectMenu(ct)
+			<button type="submit">Submit</button>
+		</form>
+	</div>
+}

@@ -3,6 +3,7 @@ package model
 import (
 	"financeapp/aggregate"
 	"financeapp/domain/budget"
+	"financeapp/domain/category"
 	"financeapp/domain/user"
 )
 
@@ -14,12 +15,18 @@ type RegisterUser struct {
 type UserAggregate struct {
 	user.User
 	Transaction []aggregate.Transaction
+	Category    []category.Category
 	*budget.Budget
 }
 
-func NewUserAggregate(u *user.User, t *[]aggregate.Transaction, b *budget.Budget) *UserAggregate {
+func NewUserAggregate(
+	u user.User,
+	t []aggregate.Transaction,
+	c []category.Category,
+	b *budget.Budget,
+) *UserAggregate {
 	return &UserAggregate{
-		*u, *t, b,
+		u, t, c, b,
 	}
 }
 

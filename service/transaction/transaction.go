@@ -134,6 +134,8 @@ func (ts TransactionService) Add(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+	c.Response().Header().Add("HX-Redirect", "/home")
+	c.Response().WriteHeader(200)
 	return c.JSON(http.StatusCreated, utils.Response{
 		Message: "Transaction created",
 		Result:  ToTransactinResponse(tran),

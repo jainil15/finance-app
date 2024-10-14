@@ -134,7 +134,11 @@ func (us UserService) GetUserInfo(userID uuid.UUID) (*model.UserAggregate, error
 		}
 		log.Println("Error Budget", err)
 	}
-	mUser := model.NewUserAggregate(u, t, b)
+	c, err := us.categoryRepo.GetByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	mUser := model.NewUserAggregate(*u, *t, c, b)
 	fmt.Println(mUser)
 	return mUser, nil
 }

@@ -17,36 +17,36 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		accessTokenCookie, err := c.Cookie("access-token")
 		if err != nil {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			return utils.WriteHTML(c, home.Home())
 		}
 		if err := accessTokenCookie.Valid(); err != nil {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			log.Println("Error Validity:", err)
 			return utils.WriteHTML(c, home.Home())
 		}
 		accessTokenString := accessTokenCookie.Value
 		// accessTokenString := getAccessTokenFromRequest(c.Request())
 		if accessTokenString == "" {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			log.Println("Error Empty:", err)
 			return utils.WriteHTML(c, home.Home())
 		}
 		accessToken, err := validateAccessToken(accessTokenString)
 		if err != nil {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			log.Println("Error Validity:", err)
 			return utils.WriteHTML(c, home.Home())
 		}
 		if !accessToken.Valid {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			log.Println("Error Invalid Again:", err)
 			return utils.WriteHTML(c, home.Home())
 		}
 
 		claims, ok := accessToken.Claims.(jwt.MapClaims)
 		if !ok {
-			c.Response().Header().Add("HX-Replace-Url", "/login")
+			c.Response().Header().Add("HX-Redirect", "/login")
 			log.Println("Error CLAIMS:", err)
 			return utils.WriteHTML(c, home.Home())
 		}
