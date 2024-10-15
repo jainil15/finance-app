@@ -5,17 +5,28 @@ import "financeapp/domain/transaction"
 import "fmt"
 
 templ TransactionRow(t aggregate.Transaction) {
-	if t.Transaction.TransactionType == transaction.Expense {
-		<tr hx-swap-oob="afterend:#user-transaction-table" class={ "bg-error",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
+	<tr
+		class={ templ.KV("bg-error",t.Transaction.TransactionType == transaction.Expense),
+            templ.KV("bg-success",(t.Transaction.TransactionType == transaction.Income)) }
+	>
+		<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
+		<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
+		<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
+	</tr>
+}
+
+templ TransactionRowOOB(t aggregate.Transaction) {
+	<tbody
+		hx-swap-oob="afterbegin:#user-transaction-table"
+		hx-swap="outerHTML"
+	>
+		<tr
+			class={ templ.KV("bg-error",t.Transaction.TransactionType == transaction.Expense),
+            templ.KV("bg-success",(t.Transaction.TransactionType == transaction.Income)) }
+		>
 			<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
 			<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
 			<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
 		</tr>
-	} else {
-		<tr class={ "bg-success",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
-			<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
-			<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
-			<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
-		</tr>
-	}
+	</tbody>
 }

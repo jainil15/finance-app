@@ -151,7 +151,10 @@ func (ts TransactionService) Add(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	utils.WriteHTML(c, fragments.UserBudgetStat(*bud, *trns))
 	at := aggregate.NewTransaction(*tran, *cat)
-	return utils.WriteHTML(c, fragments.TransactionRow(at))
+	return utils.WriteHTML(
+		c,
+		fragments.TransactionRowOOB(at),
+		fragments.UserBudgetStat(*bud, *trns),
+	)
 }
