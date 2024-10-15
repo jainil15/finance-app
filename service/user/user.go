@@ -385,7 +385,7 @@ func (u UserService) Login(c echo.Context) error {
 	accessTokenCookie := http.Cookie{
 		Name:     "access-token",
 		SameSite: http.SameSiteDefaultMode,
-		MaxAge:   8000000,
+		MaxAge:   int(time.Hour.Seconds() * 2),
 		Path:     "/",
 		Value:    token,
 	}
@@ -408,6 +408,6 @@ func (u UserService) Logout(c echo.Context) error {
 		c.SetCookie(cookie)
 	}
 	c.Response().Header().Add("HX-Redirect", "/")
-	c.Response().WriteHeader(200)
+	c.Response().WriteHeader(http.StatusNotModified)
 	return c.Redirect(http.StatusSeeOther, "/")
 }
