@@ -36,7 +36,7 @@ templ UserBudgetStat(u model.UserAggregate) {
 
 templ TransactionList(tr []aggregate.Transaction) {
 	<div class="overflow-x-auto">
-		<table class="table">
+		<table class="table text-white">
 			<!-- head -->
 			<thead>
 				<tr>
@@ -73,7 +73,7 @@ templ UserHome(u model.UserAggregate) {
 	if u.Budget == nil {
 		@forms.BudgetFrom(u.User.ID)
 	} else {
-		<div class="flex justify-between items-center">
+		<div class="flex justify-between mx-10 items-center">
 			@UserBudgetStat(u)
 			@forms.TransactionForm(u.User.ID, u.Category)
 		</div>

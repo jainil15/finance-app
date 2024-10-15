@@ -35,7 +35,7 @@ templ TransactionTypeRadio() {
 templ AddCategoryForm(userID uuid.UUID) {
 	<div class="flex items-center">
 		<input type="text" name="name" placeholder="Category" class="input input-bordered w-full max-w-xs %s"/>
-		<button type="submit" class="btn" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/api/user/%s/category", userID) } hx-target="#category-select" hx-on::after-request="document.getElementById('add_category_modal').close()">Add Category</button>
+		<button type="submit" class="btn btn-primary" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/api/user/%s/category", userID) } hx-target="#category-select" hx-on::after-request="document.getElementById('add_category_modal').close()">Add Category</button>
 	</div>
 }
 
@@ -54,7 +54,7 @@ templ TransactionCategorySelectMenu(userID uuid.UUID, ct []category.Category) {
 				}
 			</select>
 		</label>
-		<button class="btn" onclick="add_category_modal.showModal()" hx-on="htmx:afterRequest: document.getElementById('add_category_modal').close()">Add Category</button>
+		<button type="button" class="btn btn-outline" onclick="add_category_modal.showModal()">Add Category</button>
 		<!--@AddCategoryForm(userID)-->
 	}
 }
@@ -74,7 +74,7 @@ templ TransactionCurrencySelectMenu() {
 
 templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 	<!-- You can open the modal using ID.showModal() method -->
-	<button class="btn" onclick="my_modal_3.showModal()">Add transaction</button>
+	<button class="btn btn-secondary" onclick="my_modal_3.showModal()">Add transaction</button>
 	<dialog id="my_modal_3" class="modal">
 		<div class="modal-box">
 			<form method="dialog">
@@ -82,7 +82,7 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 			</form>
 			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
 				<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
-					<div class="join">
+					<div class="join gap-4">
 						@TransactionCurrencySelectMenu()
 						@TransactionFormInput("number", "Value", "value", "Amount", "0")
 					</div>
@@ -90,14 +90,14 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 					<div id="category-select" class="flex flex-row items-end justify-between w-full">
 						@TransactionCategorySelectMenu(userID, ct)
 					</div>
-					<button hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
+					<button hx-boost="true" hx-target="html" hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
 				</form>
 			</div>
 		</div>
 	</dialog>
 	<dialog id="add_category_modal" class="modal">
 		<form class="modal-box">
-			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('add_category_modal').close()">✕</button>
+			<button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="document.getElementById('add_category_modal').close()">✕</button>
 			@AddCategoryForm(userID)
 		</form>
 	</dialog>
