@@ -1,12 +1,15 @@
 package transactionService
 
 import (
+	"financeapp/aggregate"
+	"financeapp/domain/budget"
 	"financeapp/domain/category"
 	"financeapp/domain/transaction"
 	errx "financeapp/pkg/errors"
 	"financeapp/pkg/middleware"
 	"financeapp/pkg/utils"
 	"financeapp/repository/repository"
+	"financeapp/web/components/fragments"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,12 +21,18 @@ import (
 type TransactionService struct {
 	transactionRepo repository.TransactionRepo
 	categoryRepo    category.Repo
+	budgetRepo      budget.Repo
 }
 
-func NewTransactionService(tr repository.TransactionRepo, cr category.Repo) *TransactionService {
+func NewTransactionService(
+	tr repository.TransactionRepo,
+	cr category.Repo,
+	br budget.Repo,
+) *TransactionService {
 	return &TransactionService{
 		transactionRepo: tr,
 		categoryRepo:    cr,
+		budgetRepo:      br,
 	}
 }
 
@@ -134,10 +143,15 @@ func (ts TransactionService) Add(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
-	c.Response().Header().Add("HX-Redirect", "/home")
-	c.Response().WriteHeader(200)
-	return c.JSON(http.StatusCreated, utils.Response{
-		Message: "Transaction created",
-		Result:  ToTransactinResponse(tran),
-	})
+	bud, err := ts.budgetRepo.GetByUserID(t.UserID)
+	if err != nil {
+		return err
+	}
+	trns, err := ts.transactionRepo.GetByUserId(t.UserID)
+	if err != nil {
+		return err
+	}
+	utils.WriteHTML(c, fragments.UserBudgetStat(*bud, *trns))
+	at := aggregate.NewTransaction(*tran, *cat)
+	return utils.WriteHTML(c, fragments.TransactionRow(at))
 }

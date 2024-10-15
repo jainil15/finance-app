@@ -12,24 +12,33 @@ templ UserTransaction(t aggregate.Transaction) {
 	</div>
 }
 
+func TransactionIncomeSum(tran []aggregate.Transaction) float64 {
+	sum := 0.0
+	for _, t := range tran {
+		if t.Transaction.TransactionType == transaction.Income {
+			sum += float64(t.Transaction.Value)
+		}
+	}
+	return sum
+}
+
 func TransactionSum(tran []aggregate.Transaction) float64 {
 	sum := 0.0
 	for _, t := range tran {
 		if t.Transaction.TransactionType == transaction.Expense {
 			sum += float64(t.Transaction.Value)
-		} else {
-			sum -= float64(t.Transaction.Value)
 		}
 	}
 	return sum
 }
 
 templ UserBudgetStat(u model.UserAggregate) {
-	<div class="stats shadow">
+	<div class="stats shadow" id="user-stat">
 		<div class="stat">
 			<div class="stat-title">Total Budget Left</div>
 			<div class={ "stat-value", templ.KV("text-success", float64(u.Budget.Value) - TransactionSum(u.Transaction) > 0), templ.KV("text-error", float64(u.Budget.Value) - TransactionSum(u.Transaction) < 0) }>{ fmt.Sprintf("%.2f left", float64(u.Budget.Value) - TransactionSum(u.Transaction)) }</div>
-			<div class="stat-desc">Out of { fmt.Sprintf("%.2f",u.Budget.Value) }</div>
+			<div class="stat-desc">Budget of { fmt.Sprintf("%.2f",u.Budget.Value) }</div>
+			<div class="stat-actions">{ fmt.Sprintf("Income: %.2f",TransactionIncomeSum(u.Transaction)) }</div>
 		</div>
 	</div>
 }
@@ -46,7 +55,7 @@ templ TransactionList(tr []aggregate.Transaction) {
 					<th>Category</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="user-transaction-table">
 				for i, t := range tr {
 					if t.Transaction.TransactionType == transaction.Expense {
 						<tr class={ "bg-error",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
@@ -73,7 +82,7 @@ templ UserHome(u model.UserAggregate) {
 	if u.Budget == nil {
 		@forms.BudgetFrom(u.User.ID)
 	} else {
-		<div class="flex justify-between mx-10 items-center">
+		<div class="flex justify-between mr-10 items-center">
 			@UserBudgetStat(u)
 			@forms.TransactionForm(u.User.ID, u.Category)
 		</div>

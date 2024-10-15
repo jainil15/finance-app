@@ -74,8 +74,8 @@ templ TransactionCurrencySelectMenu() {
 
 templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 	<!-- You can open the modal using ID.showModal() method -->
-	<button class="btn btn-secondary" onclick="my_modal_3.showModal()">Add transaction</button>
-	<dialog id="my_modal_3" class="modal">
+	<button class="btn btn-secondary" onclick="add_transaction_modal.showModal()">Add transaction</button>
+	<dialog id="add_transaction_modal" class="modal">
 		<div class="modal-box">
 			<form method="dialog">
 				<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -90,7 +90,7 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 					<div id="category-select" class="flex flex-row items-end justify-between w-full">
 						@TransactionCategorySelectMenu(userID, ct)
 					</div>
-					<button hx-boost="true" hx-target="html" hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
+					<button hx-boost="true" hx-swap="none" hx-on::after-request="document.getElementById('add_transaction_modal').close()" hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
 				</form>
 			</div>
 		</div>

@@ -33,6 +33,7 @@ func AddRoutes(e *echo.Echo, db *sqlx.DB) error {
 	ts := transactionService.NewTransactionService(
 		postgres.NewTransactionRepo(db),
 		postgres.NewCategoryRepo(db),
+		postgres.NewBudgetRepo(db),
 	)
 	transactionService.NewTransactionRoutes(g, ts)
 	return nil

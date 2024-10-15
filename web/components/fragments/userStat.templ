@@ -1,0 +1,47 @@
+package fragments
+
+import "financeapp/aggregate"
+import "financeapp/domain/transaction"
+import "fmt"
+import "financeapp/domain/budget"
+
+func TransactionIncomeSum(tran []aggregate.Transaction) float64 {
+	sum := 0.0
+	for _, t := range tran {
+		if t.Transaction.TransactionType == transaction.Income {
+			sum += float64(t.Transaction.Value)
+		}
+	}
+	return sum
+}
+
+func TransactionSum(tran []aggregate.Transaction) float64 {
+	sum := 0.0
+	for _, t := range tran {
+		if t.Transaction.TransactionType == transaction.Expense {
+			sum += float64(t.Transaction.Value)
+		}
+	}
+	return sum
+}
+func isPos(a, b float64) bool {
+	if a-b > 0 {
+		return true
+	}
+	return false
+}
+
+templ UserBudgetStat(b budget.Budget, t []aggregate.Transaction) {
+	<div id="user-stat" hx-swap-oob="true" class="stats shadow">
+		<div class="stat">
+			<div class="stat-title">Total Budget Left</div>
+			<div class={ "stat-value", templ.KV("text-success", isPos(b.Value, TransactionSum(t) )), templ.KV("text-error", !isPos(b.Value, TransactionSum(t))) }>
+				{ fmt.Sprintf("%.2f left", float64(b.Value) - TransactionSum(t)) }
+			</div>
+			<div class="stat-desc">
+				Budget of { fmt.Sprintf("%.2f", b.Value) }
+			</div>
+			<div class="stat-actions">{ fmt.Sprintf("Income: %.2f",TransactionIncomeSum(t)) }</div>
+		</div>
+	</div>
+}
