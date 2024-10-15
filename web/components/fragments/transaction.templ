@@ -7,14 +7,12 @@ import "fmt"
 templ TransactionRow(t aggregate.Transaction) {
 	if t.Transaction.TransactionType == transaction.Expense {
 		<tr hx-swap-oob="afterend:#user-transaction-table" class={ "bg-error",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
-			<th>{  }</th>
 			<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
 			<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
 			<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
 		</tr>
 	} else {
 		<tr class={ "bg-success",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
-			<th>{  }</th>
 			<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
 			<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
 			<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>

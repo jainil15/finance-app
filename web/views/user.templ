@@ -1,10 +1,10 @@
 package views
 
 import "financeapp/pkg/model"
-import "fmt"
 import "financeapp/aggregate"
 import "financeapp/domain/transaction"
 import "financeapp/web/components/forms"
+import "financeapp/web/components/fragments"
 
 templ UserTransaction(t aggregate.Transaction) {
 	<div class="">
@@ -33,14 +33,7 @@ func TransactionSum(tran []aggregate.Transaction) float64 {
 }
 
 templ UserBudgetStat(u model.UserAggregate) {
-	<div class="stats shadow" id="user-stat">
-		<div class="stat">
-			<div class="stat-title">Total Budget Left</div>
-			<div class={ "stat-value", templ.KV("text-success", float64(u.Budget.Value) - TransactionSum(u.Transaction) > 0), templ.KV("text-error", float64(u.Budget.Value) - TransactionSum(u.Transaction) < 0) }>{ fmt.Sprintf("%.2f left", float64(u.Budget.Value) - TransactionSum(u.Transaction)) }</div>
-			<div class="stat-desc">Budget of { fmt.Sprintf("%.2f",u.Budget.Value) }</div>
-			<div class="stat-actions">{ fmt.Sprintf("Income: %.2f",TransactionIncomeSum(u.Transaction)) }</div>
-		</div>
-	</div>
+	@fragments.UserBudgetStat(*u.Budget, u.Transaction)
 }
 
 templ TransactionList(tr []aggregate.Transaction) {
@@ -49,29 +42,14 @@ templ TransactionList(tr []aggregate.Transaction) {
 			<!-- head -->
 			<thead>
 				<tr>
-					<th></th>
 					<th>Transaction Type</th>
 					<th>Cost</th>
 					<th>Category</th>
 				</tr>
 			</thead>
 			<tbody id="user-transaction-table">
-				for i, t := range tr {
-					if t.Transaction.TransactionType == transaction.Expense {
-						<tr class={ "bg-error",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
-							<th>{ string(i) }</th>
-							<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
-							<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
-							<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
-						</tr>
-					} else {
-						<tr class={ "bg-success",templ.KV((t.Transaction.TransactionType == transaction.Expense), "bg-primary"), templ.KV(string(t.Transaction.TransactionType) == "expense", "bg-white") }>
-							<th>{ string(i) }</th>
-							<td>{ fmt.Sprintf("%s",t.Transaction.TransactionType) }</td>
-							<td>{ fmt.Sprintf("%s %.2f",t.Transaction.Currency, t.Transaction.Value) }</td>
-							<td>{ fmt.Sprintf("%s", t.Category.Name) }</td>
-						</tr>
-					}
+				for _, t := range tr {
+					@fragments.TransactionRow(t)
 				}
 			</tbody>
 		</table>
