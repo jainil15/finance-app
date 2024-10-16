@@ -117,10 +117,11 @@ func (ts TransactionService) Add(c echo.Context) error {
 		errs.Add("value", err.Error())
 	}
 	if len(errs) > 0 {
-		return c.JSON(http.StatusBadRequest, utils.Error{
-			Message: "Bad Request",
-			Error:   errs,
-		})
+		return utils.WriteHTMLWithStatus(
+			c,
+			http.StatusUnprocessableEntity,
+			fragments.ErrSpanOOB(errs),
+		)
 	}
 	cat, err := ts.categoryRepo.GetByID(t.UserID, t.CategoryID)
 	if err != nil {

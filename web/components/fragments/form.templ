@@ -1,0 +1,10 @@
+package fragments
+
+import (
+	"fmt"
+	"strings"
+)
+
+templ FormInputOOB(inputType, name, placeholder string, classnames ...string) {
+	<input id={ fmt.Sprintf("%s-input", name) } class={ "input input-bordered input-error w-full max-w-xs", fmt.Sprintf("%s", strings.Join(classnames, " ")) } placeholder={ placeholder } type={ inputType }/>
+}

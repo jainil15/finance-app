@@ -4,12 +4,29 @@ import "fmt"
 import "financeapp/domain/category"
 import "github.com/google/uuid"
 
+templ HTMXAcceptErrorScript() {
+	<script>
+    document.addEventListener("DOMContentLoaded", (event)=>{
+        document.body.addEventListener('htmx:beforeSwap', (evt) => {
+            if (evt.detail.xhr.status === 422)
+            evt.detail.shouldSwap = true;
+            evt.detail.isError =  false;
+        })
+    })
+    function resetForm() {
+      document.getElementById("transaction-form").reset()
+      document.querySelectorAll('[id*=\"-error\"]').forEach(el => el.innerHTML = '');
+    }
+  </script>
+}
+
 templ TransactionFormInput(inputType, label, name, placeHolder, value string, classNames ...string) {
 	<label class="form-control join-item max-w-xs">
 		<div class="label">
 			<span class="label-text">{ label }</span>
+			<ul id={ fmt.Sprintf("%s-error", name) } class="label-text">{ label }</ul>
 		</div>
-		<input type={ inputType } name={ name } placeholder={ placeHolder } class={ fmt.Sprintf("input input-bordered w-full max-w-xs %s", classNames) }/>
+		<input type={ inputType } name={ name } id={ fmt.Sprintf("%s-input", name) } placeholder={ placeHolder } class={ fmt.Sprintf("input input-bordered w-full max-w-xs %s", classNames) }/>
 	</label>
 }
 
@@ -61,6 +78,7 @@ templ TransactionCategorySelectMenu(userID uuid.UUID, ct []category.Category) {
 
 templ TransactionCurrencySelectMenu() {
 	<label class="form-control join-item w-28 max-w-xs">
+		<ul id="category-error"></ul>
 		<div class="label">
 			<span class="label-text">Currency</span>
 		</div>
@@ -74,6 +92,7 @@ templ TransactionCurrencySelectMenu() {
 
 templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 	<!-- You can open the modal using ID.showModal() method -->
+	@HTMXAcceptErrorScript()
 	<button class="btn btn-secondary" onclick="add_transaction_modal.showModal()">Add transaction</button>
 	<dialog id="add_transaction_modal" class="modal">
 		<div class="modal-box">
@@ -81,7 +100,7 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 				<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
 			</form>
 			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 container-lg">
-				<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
+				<form hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } id="transaction-form" class="flex flex-col items-start w-full space-y-4" action="#" method="POST">
 					<div class="join gap-4">
 						@TransactionCurrencySelectMenu()
 						@TransactionFormInput("number", "Value", "value", "Amount", "0")
@@ -90,7 +109,7 @@ templ TransactionForm(userID uuid.UUID, ct []category.Category) {
 					<div id="category-select" class="flex flex-row items-end justify-between w-full">
 						@TransactionCategorySelectMenu(userID, ct)
 					</div>
-					<button hx-boost="true" hx-swap="none" hx-on::after-request="document.getElementById('add_transaction_modal').close()" hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
+					<button hx-boost="true" hx-swap="none" hx-on::after-request="if (event.detail.xhr.status == 201 || event.detail.xhr.status == 200) {document.getElementById('add_transaction_modal').close(); resetForm()}" hx-post={ fmt.Sprintf("/api/user/%s/transaction", userID) } type="submit" class="btn btn-primary">Submit</button>
 				</form>
 			</div>
 		</div>

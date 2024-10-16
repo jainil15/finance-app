@@ -5,7 +5,7 @@ import errx "financeapp/pkg/errors"
 
 templ ErrSpanOOB(errs errx.Error) {
 	for i, err := range errs {
-		<ul hx-swap-oob="true" id={ fmt.Sprintf("%s-error", i) }>
+		<ul hx-swap-oob="true" class={ "text-error", "label-text" } id={ fmt.Sprintf("%s-error", i) }>
 			for _, j := range err {
 				<li>{ j }</li>
 			}
