@@ -4,8 +4,9 @@ import "github.com/google/uuid"
 import "fmt"
 
 templ CategoryForm(userID uuid.UUID) {
-	<form hx-post={ fmt.Sprintf("/user/%s/category", userID.String()) }>
-		@TransactionFormInput("text", "Category", "name", "CategoryName", "")
-		<button type="submit">Add</button>
+	<form hx-post={ fmt.Sprintf("/api/user/%s/category", userID) } class="flex items-center">
+		<ul id="category-name-error"></ul>
+		<input type="text" name="name" placeholder="Category" class="input input-bordered w-full max-w-xs %s"/>
+		<button type="submit" class="btn btn-primary" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/api/user/%s/category", userID) }>Add</button>
 	</form>
 }

@@ -103,7 +103,7 @@ func (us UserService) TransactionForm(c echo.Context) error {
 	userIDString, ok := u.(string)
 	if !ok {
 		return c.JSON(400, utils.Error{
-			Message: errors.New("Invalid UUID").Error(),
+			Message: errors.New("This Confirmed Invalid UUID").Error(),
 		})
 	}
 	userID, err := uuid.Parse(userIDString)

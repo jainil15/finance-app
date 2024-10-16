@@ -1,0 +1,20 @@
+package fragments
+
+import "fmt"
+import errx "financeapp/pkg/errors"
+
+templ ErrSpanOOB(errs errx.Error) {
+	for i, err := range errs {
+		<ul hx-swap-oob="true" id={ fmt.Sprintf("%s-error", i) }>
+			for _, j := range err {
+				<li>{ j }</li>
+			}
+		</ul>
+	}
+}
+
+templ ErrSpan(errIDs []string) {
+	for _, id := range errIDs {
+		<ul id={ fmt.Sprintf("%s-error", id) }></ul>
+	}
+}

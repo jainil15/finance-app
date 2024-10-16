@@ -63,12 +63,11 @@ func (cs CategoryService) Add(c echo.Context) error {
 	newID := uuid.New()
 	name, err := category.NewName(categoryReq.Name)
 	if err != nil {
-		errs.Add("name", err.Error())
+		errs.Add("category-name", err.Error())
 	}
 	if len(errs) > 0 {
 		return c.JSON(http.StatusBadRequest, utils.Error{
 			Message: "Bad request",
-			Error:   errs,
 		})
 	}
 	cat := category.New(newID, categoryReq.UserID, name)
