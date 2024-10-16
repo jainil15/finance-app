@@ -3,6 +3,7 @@ package forms
 import "fmt"
 import "financeapp/domain/category"
 import "github.com/google/uuid"
+import "financeapp/web/components/fragments"
 
 templ HTMXAcceptErrorScript() {
 	<script>
@@ -11,6 +12,7 @@ templ HTMXAcceptErrorScript() {
             if (evt.detail.xhr.status === 422)
             evt.detail.shouldSwap = true;
             evt.detail.isError =  false;
+            document.querySelectorAll('[id*=\"-error\"]').forEach(el => el.innerHTML = '');
         })
     })
     function resetForm() {
@@ -24,7 +26,7 @@ templ TransactionFormInput(inputType, label, name, placeHolder, value string, cl
 	<label class="form-control join-item max-w-xs">
 		<div class="label">
 			<span class="label-text">{ label }</span>
-			<ul id={ fmt.Sprintf("%s-error", name) } class="label-text">{ label }</ul>
+			@fragments.ErrSpan(name)
 		</div>
 		<input type={ inputType } name={ name } id={ fmt.Sprintf("%s-input", name) } placeholder={ placeHolder } class={ fmt.Sprintf("input input-bordered w-full max-w-xs %s", classNames) }/>
 	</label>
@@ -63,6 +65,7 @@ templ TransactionCategorySelectMenu(userID uuid.UUID, ct []category.Category) {
 		<label class="form-control max-w-xs">
 			<div class="label">
 				<span class="label-text">Select category</span>
+				@fragments.ErrSpan("category-id")
 			</div>
 			<select name="category_id" class="select select-bordered">
 				<option disabled selected>Pick one</option>
@@ -78,9 +81,9 @@ templ TransactionCategorySelectMenu(userID uuid.UUID, ct []category.Category) {
 
 templ TransactionCurrencySelectMenu() {
 	<label class="form-control join-item w-28 max-w-xs">
-		<ul id="category-error"></ul>
-		<div class="label">
+		<div class="label truncate text-ellipsis gap-2">
 			<span class="label-text">Currency</span>
+			@fragments.ErrSpan("currency")
 		</div>
 		<select name="currency" class="select select-bordered">
 			<option disabled selected>Pick one</option>

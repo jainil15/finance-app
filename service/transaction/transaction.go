@@ -105,7 +105,7 @@ func (ts TransactionService) Add(c echo.Context) error {
 	newID := uuid.New()
 	tt, err := transaction.NewTransactionType(t.TransactionType)
 	if err != nil {
-		errs.Add("transaction_type", err.Error())
+		errs.Add("transaction-type", err.Error())
 	}
 	fmt.Printf("%v\n", t)
 	curr, err := transaction.NewCurrency(t.Currency)
@@ -115,6 +115,9 @@ func (ts TransactionService) Add(c echo.Context) error {
 	val, err := transaction.NewValue(t.Value)
 	if err != nil {
 		errs.Add("value", err.Error())
+	}
+	if t.CategoryID.String() == "00000000-0000-0000-0000-000000000000" {
+		errs.Add("category-id", "Select Category")
 	}
 	if len(errs) > 0 {
 		return utils.WriteHTMLWithStatus(

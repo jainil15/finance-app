@@ -1,9 +1,32 @@
 package fragments
 
 import "financeapp/domain/category"
-import "financeapp/web/components/forms"
 import "github.com/google/uuid"
+import "fmt"
 
-templ CategorySelect(userID uuid.UUID, cats []category.Category) {
-	@forms.TransactionCategorySelectMenu(userID, cats)
+templ AddCategoryForm(userID uuid.UUID) {
+	<div class="flex items-center">
+		<input type="text" name="name" placeholder="Category" class="input input-bordered w-full max-w-xs %s"/>
+		<button type="submit" class="btn btn-primary" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/api/user/%s/category", userID) } hx-target="#category-select" hx-on::after-request="document.getElementById('add_category_modal').close()">Add Category</button>
+	</div>
+}
+
+templ CategorySelect(userID uuid.UUID, ct []category.Category) {
+	if len(ct) ==  0 {
+		@AddCategoryForm(userID)
+	} else {
+		<label class="form-control max-w-xs">
+			<div class="label">
+				<span class="label-text">Select category</span>
+				ErrSpan("category-id")
+			</div>
+			<select name="category_id" class="select select-bordered">
+				<option disabled selected>Pick one</option>
+				for _, i := range ct {
+					<option value={ i.ID.String() }>{ string(i.Name) }</option>
+				}
+			</select>
+		</label>
+		<button type="button" class="btn btn-outline" onclick="add_category_modal.showModal()">Add Category</button>
+	}
 }
